@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "horizon/schemas/supply-daily.schema.json",
+  "title": "Supply daily row",
+  "description": "One row per date × region × channel(skill) × cohort in books/<client>/04-supply/supply-daily-<period>-v<nnn>.csv. Each metric field is a ledger-row envelope.",
+  "type": "object",
+  "required": ["date", "region", "channel", "cohort", "scheduled_h", "staffed_h", "productive_h", "version", "actor"],
+  "properties": {
+    "date": { "$ref": "ledger-row.schema.json#/$defs/date" },
+    "region": { "$ref": "ledger-row.schema.json#/$defs/region" },
+    "channel": { "$ref": "ledger-row.schema.json#/$defs/channel" },
+    "cohort": { "$ref": "ledger-row.schema.json#/$defs/cohort" },
+    "team": { "type": "string", "description": "Larkspur home team or Crestline Services" },
+    "scheduled_h": { "$ref": "#/$defs/metric", "description": "cites scheduled-hours" },
+    "staffed_h": { "$ref": "#/$defs/metric", "description": "cites staffed-hours" },
+    "productive_h": { "$ref": "#/$defs/metric", "description": "cites productive-hours" },
+    "shrink_planned_pct": { "$ref": "#/$defs/metric", "description": "cites shrinkage" },
+    "shrink_unplanned_pct": { "$ref": "#/$defs/metric", "description": "cites shrinkage" },
+    "occupancy_pct": { "$ref": "#/$defs/metric", "description": "cites occupancy (agent-work numerator only)" },
+    "concurrency_eff": { "$ref": "#/$defs/metric", "description": "cites concurrency; 1 on voice and email" },
+    "headcount": { "$ref": "#/$defs/metric", "description": "cites fte (on-roster headcount)" },
+    "headcount_in_training": { "$ref": "#/$defs/metric", "description": "cites fte" },
+    "tenure_band": {
+      "description": "Optional split of the row by tenure band, for learning-curve tests.",
+      "type": "string",
+      "enum": ["0-30d", "31-90d", "91-180d", "180d+"]
+    },
+    "version": { "type": "string", "pattern": "^v[0-9]{3}$" },
+    "actor": { "$ref": "ledger-row.schema.json#/$defs/actor" }
+  },
+  "$defs": {
+    "metric": { "$ref": "ledger-row.schema.json" }
+  }
+}

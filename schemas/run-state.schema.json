@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "horizon/schemas/run-state.schema.json",
+  "title": "HORIZON run state",
+  "description": "State file for one run of one clock (daily, weekly, monthly, ad hoc) on one book, for pause and resume by the Coordinator. Adapted from the CASE pipeline-state pattern: tasks become stages with an agent each; gates are explicit and the planner gate is a human.",
+  "type": "object",
+  "required": ["pipeline", "book", "clock", "run_date", "status", "stages", "gates", "created_at"],
+  "properties": {
+    "pipeline": { "type": "string", "const": "HORIZON" },
+    "book": {
+      "type": "object",
+      "required": ["client", "directory"],
+      "properties": {
+        "client": { "type": "string", "description": "Book slug, e.g. halcyon" },
+        "directory": { "type": "string", "description": "Absolute path to books/<client>" }
+      }
+    },
+    "clock": { "type": "string", "enum": ["daily", "weekly", "monthly", "adhoc"] },
+    "run_date": { "type": "string", "format": "date", "description": "The planning date the run is for (daily: the day being scored)" },
+    "run_id": { "type": "string", "description": "e.g. daily-2026-09-15-r1; r increments on rerun" },
+    "status": { "type": "string", "enum": ["initializing", "running", "awaiting_gate", "paused", "completed", "blocked", "failed"] },
+    "stages": {
+      "description": "Ordered stages of the clock. Daily default: ingest → reconcile → score → decompose → match_events → update_hypotheses → reforecast → evaluate → planner_gate → publish → export_iex.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "agent", "status"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": {
+            "type": "string",
+            "enum": ["intake", "ingest", "reconcile", "score", "decompose", "match_events", "update_hypotheses", "reforecast", "capacity_plan", "scenarios", "evaluate", "planner_gate", "publish", "export_iex", "export_anaplan", "register_report", "backlog_review", "other"]
+          },
+          "agent": {
+            "type": "string",
+            "enum": ["Coordinator", "Librarian", "DataEngineer", "PostAnalyst", "Scout", "CausalAnalyst", "Forecaster", "CapacityPlanner", "Evaluator", "Reporter", "Adapter-IEX", "Adapter-Anaplan", "Adapter-Email", "Planner"]
+          },
+          "status": { "type": "string", "enum": ["pending", "in_progress", "completed", "skipped", "blocked", "failed"] },
+          "blocked_by": { "type": "array", "items": { "type": "integer" } },
+          "input_files": { "type": "array", "items": { "type": "string" } },
+          "output_files": { "type": "array", "items": { "type": "string" }, "description": "Ledger files with versions, or dispatches with dates" },
+          "started_at": { "type": "string", "format": "date-time" },
+          "completed_at": { "type": "string", "format": "date-time" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "gates": {
+      "description": "Every gate the run must pass. The Evaluator gate is an agent; the planner gate is a human and cannot be passed by an agent.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "kind", "status"],
+        "properties": {
+          "name": { "type": "string", "enum": ["evaluator", "planner-reforecast", "planner-capacity-plan", "planner-severity", "planner-publication", "planner-monthly-signoff"] },
+          "kind": { "type": "string", "enum": ["agent", "human"] },
+          "status": { "type": "string", "enum": ["pending", "passed", "blocked", "waived"] },
+          "decided_by": { "$ref": "ledger-row.schema.json#/$defs/actor" },
+          "decided_at": { "type": "string", "format": "date-time" },
+          "reason": { "type": "string", "description": "Required on blocked or waived" },
+          "rules_checked": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["no-unlabeled-carried-assumption", "grades-present", "rung-respected", "definitions-cited", "sums-reconcile", "answer-first-shape"] }
+          }
+        },
+        "allOf": [
+          { "if": { "properties": { "kind": { "const": "human" }, "status": { "enum": ["passed", "waived"] } } }, "then": { "properties": { "decided_by": { "pattern": "^human:" } }, "required": ["decided_by"] } },
+          { "if": { "properties": { "status": { "enum": ["blocked", "waived"] } } }, "then": { "required": ["reason"] } }
+        ]
+      }
+    },
+    "reforecast": {
+      "type": "object",
+      "properties": {
+        "proposed_version": { "type": "string", "pattern": "^v[0-9]{3}$" },
+        "status": { "type": "string", "enum": ["not_needed", "proposed", "approved", "blocked", "superseded"] },
+        "trigger": { "type": "string" }
+      }
+    },
+    "variance_summary": {
+      "description": "PostAnalyst output for the run, for the Reporter.",
+      "type": "object",
+      "properties": {
+        "by_channel": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["channel", "forecast", "actual", "variance_pct"],
+            "properties": {
+              "channel": { "$ref": "ledger-row.schema.json#/$defs/channel" },
+              "forecast": { "type": "number" },
+              "actual": { "type": "number" },
+              "variance_pct": { "type": "number" },
+              "decomposition": {
+                "type": "object",
+                "properties": {
+                  "volume": { "type": "number" },
+                  "handle_time": { "type": "number" },
+                  "mix": { "type": "number" },
+                  "supply": { "type": "number" },
+                  "residual": { "type": "number" },
+                  "method": { "type": "string", "enum": ["shapley", "sequential"] }
+                }
+              }
+            }
+          }
+        },
+        "regime_flags": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "events_matched": { "type": "array", "items": { "type": "string", "pattern": "^EV-[0-9]{3,}$" } },
+    "questions_touched": { "type": "array", "items": { "type": "string", "pattern": "^XR-[0-9]{3,}$" } },
+    "skills_invoked": { "type": "array", "items": { "type": "string" }, "description": "For the Evaluator's audit" },
+    "causal_escalation": { "type": "boolean", "description": "Whether a rung-2+ question was opened this run" },
+    "changelog_entries": { "type": "array", "items": { "type": "string" }, "description": "Rows appended to the book CHANGELOG by this run" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "paused_at": { "type": "string", "format": "date-time" },
+    "resumed_at": { "type": "string", "format": "date-time" },
+    "completed_at": { "type": "string", "format": "date-time" }
+  }
+}

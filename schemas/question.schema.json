@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "horizon/schemas/question.schema.json",
+  "title": "Question register row (XR)",
+  "description": "One row of books/<client>/06-questions/register.md. The register is the source; reports are derived from it. Severity is set by the register owner only. Anything arriving by email enters at grade A.",
+  "type": "object",
+  "required": ["id", "title", "description", "opened", "severity", "status", "trend", "owner", "line_of_sight", "decision_needed", "expected_close", "last_update", "grade", "source", "would_change_the_answer"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^XR-[0-9]{3,}$", "description": "Permanent; never reused or renumbered" },
+    "title": {
+      "type": "string",
+      "description": "The answer, as one sentence a reader with no context could act on. Not a topic label. Carries the grade when rendered."
+    },
+    "description": { "type": "string", "description": "2–4 sentences: what, since when, where, to whom" },
+    "opened": { "type": "string", "format": "date" },
+    "severity": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4,
+      "description": "1 harm occurring or imminent · 2 material impact within the cycle · 3 managed within the function · 4 watch. Set by the register owner only; sender proposals go in notes."
+    },
+    "status": { "type": "string", "enum": ["New", "Assessing", "Mitigating", "Monitoring", "Resolved", "Closed"] },
+    "trend": { "type": "string", "enum": ["Improving", "Stable", "Worsening"], "description": "Tracks the path to close, not the latest measure" },
+    "business_risk": {
+      "type": "object",
+      "properties": {
+        "text": { "type": "string" },
+        "grade": { "$ref": "ledger-row.schema.json#/$defs/grade" }
+      }
+    },
+    "decision_needed": {
+      "type": "object",
+      "required": ["needed"],
+      "properties": {
+        "needed": { "type": "boolean" },
+        "decision": { "type": "string", "description": "One sentence" },
+        "by": { "type": "string", "format": "date" },
+        "decider": { "type": "string" }
+      },
+      "if": { "properties": { "needed": { "const": true } } },
+      "then": { "required": ["decision", "by"] }
+    },
+    "owner": { "type": "string", "description": "One accountable person or role. Never a team" },
+    "line_of_sight": { "type": "array", "minItems": 1, "maxItems": 2, "items": { "type": "string" } },
+    "expected_close": {
+      "type": "object",
+      "required": ["date", "confidence"],
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "confidence": { "type": "string", "enum": ["firm", "likely", "indicative"] },
+        "assumption": { "type": "string" },
+        "slip_count": { "type": "integer", "minimum": 0, "description": "Successive moves to a later date; flag at 2" }
+      }
+    },
+    "next_action": {
+      "type": "object",
+      "properties": {
+        "action": { "type": "string" },
+        "who": { "type": "string" },
+        "by": { "type": "string", "format": "date" }
+      }
+    },
+    "last_update": {
+      "type": "object",
+      "required": ["date", "sender", "channel"],
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "sender": { "type": "string" },
+        "channel": { "type": "string", "enum": ["email", "chat", "meeting", "ledger", "agent"] }
+      }
+    },
+    "grade": {
+      "description": "Grade of the title sentence. Email enters at A. Rises only when a measure or producible artifact is named.",
+      "$ref": "ledger-row.schema.json#/$defs/grade"
+    },
+    "source": { "type": "string", "description": "Thread subject and date, message id, or ledger file of the last update" },
+    "would_change_the_answer": { "type": "string", "description": "The observation that would move title, severity or trend. Required for Sev 1–2; 'open' otherwise until known" },
+    "hypotheses_ref": { "type": "string", "description": "Path to the hypothesis table for this row, if opened" },
+    "answer_card_ref": { "type": "string", "description": "Path to the filed answer card in knowledge/, once answered" },
+    "linked_events": { "type": "array", "items": { "type": "string", "pattern": "^EV-[0-9]{3,}$" } },
+    "route": { "type": "string", "enum": ["performance-question", "planning-request", "data-pull", "event"], "description": "Intake routing decision" },
+    "notes": { "type": "string", "description": "Sender severity proposals, precedence overrides, SLIP flags, artifacts that would raise the grade" }
+  }
+}

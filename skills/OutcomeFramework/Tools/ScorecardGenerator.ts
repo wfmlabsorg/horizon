@@ -1,0 +1,317 @@
+#!/usr/bin/env bun
+/**
+ * ScorecardGenerator - Generate outcome scorecards for engagements
+ *
+ * Usage:
+ *   bun run ScorecardGenerator.ts --new "Client Name"
+ *   bun run ScorecardGenerator.ts --quick "Client Name"
+ *   bun run ScorecardGenerator.ts --template
+ */
+
+interface ScorecardData {
+  clientName: string;
+  date: string;
+  phase: string;
+  cx: {
+    metrics: { name: string; current: string; benchmark: string; gap: string }[];
+    drivers: string[];
+    opportunities: string[];
+    constraints: string[];
+  };
+  cost: {
+    metrics: { name: string; current: string; benchmark: string; gap: string }[];
+    drivers: string[];
+    opportunities: string[];
+    constraints: string[];
+  };
+  ex: {
+    metrics: { name: string; current: string; benchmark: string; gap: string }[];
+    drivers: string[];
+    opportunities: string[];
+    constraints: string[];
+  };
+  tradeoffs: { tradeoff: string; domains: string; balance: string; recommendation: string }[];
+  recommendations: { priority: number; action: string; domain: string; impact: string; risk: string }[];
+}
+
+function generateFullScorecard(clientName: string): string {
+  const date = new Date().toISOString().split('T')[0];
+
+  return `# Outcome Scorecard: ${clientName}
+**Date:** ${date}
+**Phase:** [Discovery/Analysis/Recommendations]
+
+---
+
+## Executive Summary
+
+[2-3 sentences capturing the overall state and top priorities]
+
+---
+
+## CX — Customer Experience
+
+### Current State
+| Metric | Current | Benchmark | Gap |
+|--------|---------|-----------|-----|
+| CSAT | [X] | [Y] | [Z] |
+| FCR | [X%] | [Y%] | [Z%] |
+| SL | [X%] | [Y%] | [Z%] |
+| NPS | [X] | [Y] | [Z] |
+
+### Key Drivers
+1. **[Driver 1]** — [X%] of explained variance
+2. **[Driver 2]** — [Description]
+3. **[Driver 3]** — [Description]
+
+### Opportunities
+- [ ] [Opportunity 1] — Est. impact: [+X% CX metric]
+- [ ] [Opportunity 2] — Est. impact: [+X% CX metric]
+
+### Constraints
+- [Constraint 1]
+- [Constraint 2]
+
+---
+
+## COST — Financial Outcomes
+
+### Current State
+| Metric | Current | Benchmark | Gap |
+|--------|---------|-----------|-----|
+| Cost/Contact | $[X] | $[Y] | $[Z] |
+| AHT | [X] sec | [Y] sec | [Z] sec |
+| Occupancy | [X%] | [Y%] | [Z%] |
+| FTE | [X] | [Target] | [Gap] |
+
+### Key Drivers
+1. **[Driver 1]** — [X%] of cost variance
+2. **[Driver 2]** — [Description]
+3. **[Driver 3]** — [Description]
+
+### Opportunities
+- [ ] [Opportunity 1] — Est. impact: [-$X or -X%]
+- [ ] [Opportunity 2] — Est. impact: [-$X or -X%]
+
+### Constraints
+- [Constraint 1]
+- [Constraint 2]
+
+---
+
+## EX — Employee Experience
+
+### Current State
+| Metric | Current | Benchmark | Gap |
+|--------|---------|-----------|-----|
+| Turnover | [X%] | [Y%] | [Z%] |
+| eNPS | [X] | [Y] | [Z] |
+| Absenteeism | [X%] | [Y%] | [Z%] |
+| Tenure | [X] mo | [Y] mo | [Z] mo |
+
+### Key Drivers
+1. **[Driver 1]** — [Contribution to turnover/engagement]
+2. **[Driver 2]** — [Description]
+3. **[Driver 3]** — [Description]
+
+### Opportunities
+- [ ] [Opportunity 1] — Est. impact: [-X% turnover]
+- [ ] [Opportunity 2] — Est. impact: [+X eNPS]
+
+### Constraints
+- [Constraint 1]
+- [Constraint 2]
+
+---
+
+## Cross-Domain Analysis
+
+### The Outcome Triangle for ${clientName}
+
+\`\`\`
+         CX: [State]
+            /\\
+           /  \\
+          /    \\
+         /______\\
+    COST:        EX:
+   [State]     [State]
+\`\`\`
+
+### Key Tradeoffs Identified
+
+| Tradeoff | Domains | Current Balance | Recommendation |
+|----------|---------|-----------------|----------------|
+| [Tradeoff 1] | CX ↔ COST | [Favors X] | [Recommendation] |
+| [Tradeoff 2] | COST ↔ EX | [Favors X] | [Recommendation] |
+| [Tradeoff 3] | CX ↔ EX | [Favors X] | [Recommendation] |
+
+### Feedback Loops Discovered
+
+**Positive (Virtuous Cycles):**
+- [Description]
+
+**Negative (Risk Spirals):**
+- [Description]
+
+### Root Causes Affecting Multiple Domains
+
+| Root Cause | CX Impact | COST Impact | EX Impact |
+|------------|-----------|-------------|-----------|
+| [Cause 1] | [Effect] | [Effect] | [Effect] |
+| [Cause 2] | [Effect] | [Effect] | [Effect] |
+
+---
+
+## Prioritized Recommendations
+
+| Priority | Recommendation | Primary Domain | Est. Impact | Risk |
+|----------|----------------|----------------|-------------|------|
+| 1 | [Action] | [CX/COST/EX] | [Quantified] | [H/M/L] |
+| 2 | [Action] | [CX/COST/EX] | [Quantified] | [H/M/L] |
+| 3 | [Action] | [CX/COST/EX] | [Quantified] | [H/M/L] |
+| 4 | [Action] | [CX/COST/EX] | [Quantified] | [H/M/L] |
+| 5 | [Action] | [CX/COST/EX] | [Quantified] | [H/M/L] |
+
+---
+
+## Data Confidence
+
+| Domain | Data Quality | Key Gaps |
+|--------|--------------|----------|
+| CX | [High/Med/Low] | [What's missing] |
+| COST | [High/Med/Low] | [What's missing] |
+| EX | [High/Med/Low] | [What's missing] |
+
+---
+
+## Next Steps
+
+1. [Next step 1]
+2. [Next step 2]
+3. [Next step 3]
+
+---
+
+*Generated by OutcomeFramework skill*
+`;
+}
+
+function generateQuickScorecard(clientName: string): string {
+  const date = new Date().toISOString().split('T')[0];
+
+  return `# Quick Scorecard: ${clientName} — ${date}
+
+| Domain | State | Top Driver | Top Opportunity |
+|--------|-------|------------|-----------------|
+| 🎯 CX | [Good/Fair/Poor] | [Driver] | [Opportunity] |
+| 💰 COST | [Good/Fair/Poor] | [Driver] | [Opportunity] |
+| 👤 EX | [Good/Fair/Poor] | [Driver] | [Opportunity] |
+
+**Key Insight:** [One sentence summarizing the main finding]
+
+**Top Priority:** [Single most important recommendation]
+
+**Key Tradeoff:** [Most significant tension between domains]
+
+---
+
+*Quick scorecard generated by OutcomeFramework skill*
+`;
+}
+
+function generateTemplate(): string {
+  return `# Outcome Scorecard Template
+
+Use this template structure for all contact center engagements.
+
+## Required Sections
+
+1. **Executive Summary** — 2-3 sentences
+2. **CX Section** — Metrics, drivers, opportunities, constraints
+3. **COST Section** — Metrics, drivers, opportunities, constraints
+4. **EX Section** — Metrics, drivers, opportunities, constraints
+5. **Cross-Domain Analysis** — Triangle, tradeoffs, feedback loops
+6. **Recommendations** — Prioritized list with impact estimates
+7. **Data Confidence** — Quality assessment and gaps
+8. **Next Steps** — Action items
+
+## Metric Standards
+
+### CX Metrics
+- CSAT (1-5 or %)
+- NPS (-100 to +100)
+- FCR (%)
+- Service Level (% in X seconds)
+- ASA (seconds)
+
+### COST Metrics
+- Cost per Contact ($)
+- AHT (seconds)
+- Occupancy (%)
+- FTE (headcount)
+- Shrinkage (%)
+
+### EX Metrics
+- Turnover (% annual)
+- eNPS (-100 to +100)
+- Absenteeism (%)
+- Tenure (months)
+- Engagement Score (%)
+
+## Confidence Levels
+
+- **High**: System-captured, validated data
+- **Medium**: Survey data or calculated metrics
+- **Low**: Estimates, proxies, or limited samples
+
+---
+
+*Template from OutcomeFramework skill*
+`;
+}
+
+function printHelp(): void {
+  console.log(`
+ScorecardGenerator - Create outcome scorecards for contact center engagements
+
+Usage:
+  bun run ScorecardGenerator.ts --new "Client Name"     Create full scorecard
+  bun run ScorecardGenerator.ts --quick "Client Name"   Create quick scorecard
+  bun run ScorecardGenerator.ts --template              Show template structure
+
+Output:
+  Prints markdown to stdout. Redirect to file:
+  bun run ScorecardGenerator.ts --new "Acme Corp" > scorecard.md
+`);
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+
+  if (args.length === 0 || args[0] === '--help') {
+    printHelp();
+    return;
+  }
+
+  if (args[0] === '--template') {
+    console.log(generateTemplate());
+    return;
+  }
+
+  if (args[0] === '--new' && args[1]) {
+    const clientName = args.slice(1).join(' ');
+    console.log(generateFullScorecard(clientName));
+    return;
+  }
+
+  if (args[0] === '--quick' && args[1]) {
+    const clientName = args.slice(1).join(' ');
+    console.log(generateQuickScorecard(clientName));
+    return;
+  }
+
+  console.log('Invalid arguments. Use --help for usage information.');
+}
+
+main();

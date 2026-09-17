@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "horizon/schemas/hypothesis.schema.json",
+  "title": "Hypothesis",
+  "description": "One row of the hypothesis table attached to an XR row. Each hypothesis names a driver, tags it structural or transitional, and states the test that would settle it. Rung is the ladder level the current evidence supports; a causal claim needs rung 2 or above and an Evaluator pass.",
+  "type": "object",
+  "required": ["id", "question_id", "claim", "driver", "structural_or_transitional", "evidence_for", "evidence_against", "settling_test", "data_needed", "status", "grade"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^H-[0-9]{3,}$" },
+    "question_id": { "type": "string", "pattern": "^XR-[0-9]{3,}$" },
+    "claim": { "type": "string", "description": "One falsifiable sentence" },
+    "driver": { "type": "string", "description": "The named cause under test, e.g. handle-time level shift at Meridian go-live, East" },
+    "side": { "type": "string", "enum": ["demand", "supply", "mix", "handle-time", "definition", "other"] },
+    "structural_or_transitional": {
+      "description": "Required. Decides whether the driver belongs in steady-state staffing.",
+      "type": "string",
+      "enum": ["structural", "transitional", "unknown"]
+    },
+    "evidence_for": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
+    "evidence_against": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
+    "confounders": { "type": "array", "items": { "type": "string" }, "description": "Named by the CausalAnalyst from the DAG, e.g. outage EV-004 in the same week" },
+    "settling_test": { "type": "string", "description": "The test that would decide between this and its alternatives, with the threshold" },
+    "data_needed": { "type": "array", "items": { "type": "string" }, "description": "Ledger files or pulls, with grain and period" },
+    "rung": { "type": "integer", "minimum": 1, "maximum": 3, "description": "1 association · 2 intervention · 3 counterfactual" },
+    "status": { "type": "string", "enum": ["open", "testing", "supported", "refuted", "inconclusive", "superseded"] },
+    "grade": { "$ref": "ledger-row.schema.json#/$defs/grade" },
+    "effect_estimate": { "$ref": "ledger-row.schema.json", "description": "Size of the effect if supported, graded" },
+    "would_change_the_answer": { "type": "string" },
+    "evaluator": {
+      "type": "object",
+      "properties": {
+        "result": { "type": "string", "enum": ["pass", "block", "pending"] },
+        "notes": { "type": "string" }
+      }
+    },
+    "owner": { "type": "string" },
+    "opened": { "type": "string", "format": "date" },
+    "updated": { "type": "string", "format": "date" }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "required": ["text", "grade", "source"],
+      "properties": {
+        "text": { "type": "string" },
+        "grade": { "$ref": "ledger-row.schema.json#/$defs/grade" },
+        "source": { "type": "string" },
+        "date": { "type": "string", "format": "date" }
+      }
+    }
+  }
+}

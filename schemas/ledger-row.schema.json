@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "horizon/schemas/ledger-row.schema.json",
+  "title": "Ledger row envelope",
+  "description": "The common envelope every graded number in a HORIZON book carries. Ledger-specific schemas embed this for each numeric field, or apply it row-wide with a shared definition_ref per column. A value without definition_ref and grade is not admissible.",
+  "type": "object",
+  "required": ["value", "definition_ref", "grade", "source", "version", "actor"],
+  "properties": {
+    "value": {
+      "description": "The number (or null when the source has no value for this period; never 0 as a stand-in).",
+      "type": ["number", "null"]
+    },
+    "definition_ref": {
+      "description": "Slug of the metric file in books/<client>/01-definitions/, e.g. aht-agent-work.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "grade": { "$ref": "#/$defs/grade" },
+    "formula": {
+      "description": "Required when grade is C: the formula as applied, with the grade of each input.",
+      "type": "string"
+    },
+    "range": {
+      "description": "Required when grade is E: the low and high of the estimate.",
+      "type": "object",
+      "required": ["low", "high"],
+      "properties": {
+        "low": { "type": "number" },
+        "high": { "type": "number" }
+      }
+    },
+    "assumption": {
+      "description": "Required when grade is E: the assumption that produced the estimate.",
+      "type": "string"
+    },
+    "source": {
+      "description": "Where the value came from: system name and pull, or the file/message it was read from.",
+      "type": "object",
+      "required": ["system", "ref"],
+      "properties": {
+        "system": { "type": "string", "description": "e.g. acd, wfm, booking-platform, email, forecaster" },
+        "ref": { "type": "string", "description": "Pull id, file path with version, or message id" },
+        "pulled_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "version": {
+      "description": "Version of the ledger file this row belongs to, v001 upward.",
+      "type": "string",
+      "pattern": "^v[0-9]{3}$"
+    },
+    "actor": { "$ref": "#/$defs/actor" },
+    "written_at": { "type": "string", "format": "date-time" },
+    "supersedes": {
+      "description": "Version this row corrects, if any. The corrected row is never deleted.",
+      "type": "string",
+      "pattern": "^v[0-9]{3}$"
+    },
+    "note": { "type": "string" }
+  },
+  "allOf": [
+    { "if": { "properties": { "grade": { "const": "C" } } }, "then": { "required": ["formula"] } },
+    { "if": { "properties": { "grade": { "const": "E" } } }, "then": { "required": ["range", "assumption"] } }
+  ],
+  "$defs": {
+    "grade": {
+      "description": "M measured · C computed (formula stated) · E estimated (range and assumption) · A asserted (one source).",
+      "type": "string",
+      "enum": ["M", "C", "E", "A"]
+    },
+    "actor": {
+      "description": "Who wrote the row: agent:<Name> or human:<role>.",
+      "type": "string",
+      "pattern": "^(agent|human):[A-Za-z][A-Za-z0-9 _-]*$"
+    },
+    "region": { "type": "string", "enum": ["North", "East", "West"] },
+    "channel": { "type": "string", "enum": ["voice", "chat", "email"] },
+    "cohort": { "type": "string", "enum": ["home-team", "vendor"] },
+    "platform": { "type": "string", "enum": ["Beacon", "Meridian"] },
+    "date": { "type": "string", "format": "date" }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "horizon/schemas/assumption.schema.json",
+  "title": "Assumption",
+  "description": "One row of an assumption register (forecast or capacity plan). Every assumption is graded, says where it came from, whether it persists, and what observation would change it.",
+  "type": "object",
+  "required": ["id", "name", "value", "grade", "carried_from", "structural_or_transitional", "what_would_change_it", "owner"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^AS-[0-9]{3,}$" },
+    "name": { "type": "string", "description": "Short name, e.g. chat effective concurrency, East region" },
+    "value": {
+      "description": "The assumed value with its unit, or a range when grade is E.",
+      "type": "object",
+      "required": ["unit"],
+      "properties": {
+        "point": { "type": ["number", "string"] },
+        "low": { "type": "number" },
+        "high": { "type": "number" },
+        "unit": { "type": "string" }
+      }
+    },
+    "definition_ref": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "Metric the assumption is about, if any" },
+    "grade": { "$ref": "ledger-row.schema.json#/$defs/grade" },
+    "carried_from": {
+      "description": "Where the value came from. 'measured' means from this book's ledger; anything carried from another book, era, platform or channel is named here and cannot be graded M.",
+      "type": "object",
+      "required": ["kind", "ref"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["measured-this-book", "prior-version", "other-book", "other-platform", "other-channel", "vendor-statement", "client-statement", "judgement"] },
+        "ref": { "type": "string" }
+      }
+    },
+    "structural_or_transitional": {
+      "description": "structural: persists into steady state and belongs in the capacity plan · transitional: passes and belongs in the short-term forecast only.",
+      "type": "string",
+      "enum": ["structural", "transitional", "unknown"]
+    },
+    "what_would_change_it": { "type": "string", "description": "The observation, and its threshold, that would revise this assumption" },
+    "sensitivity": { "type": "string", "description": "Effect on the output of moving the assumption across its range, e.g. ±4% requirement hours" },
+    "owner": { "type": "string", "description": "One role or name; never a team" },
+    "status": { "type": "string", "enum": ["active", "retired", "replaced"], "default": "active" },
+    "replaced_by": { "type": "string", "pattern": "^AS-[0-9]{3,}$" },
+    "first_used_in": { "type": "string", "description": "Forecast or plan version where it first appeared" },
+    "note": { "type": "string" }
+  }
+}

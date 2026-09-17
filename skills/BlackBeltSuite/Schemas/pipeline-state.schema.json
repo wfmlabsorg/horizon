@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Consulting Pipeline State",
+  "description": "Standard state file for pause/resume across consulting Agent Teams workflows",
+  "type": "object",
+  "required": ["pipeline", "project", "workflow", "status", "tasks", "created_at"],
+  "properties": {
+    "pipeline": {
+      "type": "string",
+      "const": "BlackBeltSuite",
+      "description": "Pipeline identifier"
+    },
+    "project": {
+      "type": "object",
+      "required": ["name", "client", "directory"],
+      "properties": {
+        "name": { "type": "string" },
+        "client": { "type": "string", "description": "Scrubbed client name or [CLIENT]" },
+        "directory": { "type": "string", "description": "Absolute path to project directory" }
+      }
+    },
+    "workflow": {
+      "type": "string",
+      "enum": ["FullAnalysis", "VarianceDeepDive", "QuickDiagnostics", "ProcessImprovement"],
+      "description": "Which BlackBeltSuite workflow is running"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["initializing", "running", "paused", "completed", "failed"],
+      "description": "Overall pipeline status"
+    },
+    "skills_invoked": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of HORIZON skills used in this pipeline run (for MethodologyChallenger audit)"
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "agent_role", "status"],
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "agent_role": { "type": "string", "description": "Which teammate handles this" },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "in_progress", "completed", "skipped", "failed"]
+          },
+          "blocked_by": {
+            "type": "array",
+            "items": { "type": "integer" }
+          },
+          "output_files": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Files produced by this task"
+          },
+          "started_at": { "type": "string", "format": "date-time" },
+          "completed_at": { "type": "string", "format": "date-time" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "outcome_mapping": {
+      "type": "object",
+      "description": "CX/COST/EX mapping validation tracker",
+      "properties": {
+        "findings_with_mapping": { "type": "integer" },
+        "findings_without_mapping": { "type": "integer" },
+        "enforcement_status": {
+          "type": "string",
+          "enum": ["pass", "fail", "pending"]
+        }
+      }
+    },
+    "causal_escalation": {
+      "type": "boolean",
+      "description": "Whether causal analysis was triggered"
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "paused_at": { "type": "string", "format": "date-time" },
+    "resumed_at": { "type": "string", "format": "date-time" }
+  }
+}

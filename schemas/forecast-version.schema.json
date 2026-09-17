@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "horizon/schemas/forecast-version.schema.json",
+  "title": "Forecast version",
+  "description": "Descriptor for one folder books/<client>/03-forecast/v<nnn>-<label>/. Sits beside the forecast CSV as version.json. Status flows proposed → approved → superseded; only a human planner may approve.",
+  "type": "object",
+  "required": ["version", "label", "horizon", "grain", "period", "assumptions_ref", "lineage", "status", "produced_by", "created_at"],
+  "properties": {
+    "version": { "type": "string", "pattern": "^v[0-9]{3}$" },
+    "label": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "Folder suffix, e.g. plan-of-record, reforecast-day12" },
+    "horizon": {
+      "type": "string",
+      "enum": ["short", "mid", "long"],
+      "description": "short: 1–6 weeks, daily/interval · mid: 3–18 months, weekly · long: annual plan, monthly"
+    },
+    "grain": { "type": "string", "enum": ["interval", "daily", "weekly", "monthly"] },
+    "period": {
+      "type": "object",
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "type": "string", "format": "date" },
+        "end": { "type": "string", "format": "date" }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "regions": { "type": "array", "items": { "$ref": "ledger-row.schema.json#/$defs/region" } },
+        "channels": { "type": "array", "items": { "$ref": "ledger-row.schema.json#/$defs/channel" } }
+      }
+    },
+    "files": {
+      "type": "object",
+      "required": ["forecast_csv", "assumptions_md", "lineage_md"],
+      "properties": {
+        "forecast_csv": { "type": "string" },
+        "assumptions_md": { "type": "string" },
+        "lineage_md": { "type": "string" }
+      }
+    },
+    "assumptions_ref": {
+      "description": "Path to the assumption register for this version, plus the ids of assumptions it contains.",
+      "type": "object",
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string" },
+        "assumption_ids": { "type": "array", "items": { "type": "string", "pattern": "^AS-[0-9]{3,}$" } }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "required": ["parent_version", "demand_inputs", "supply_inputs", "method"],
+      "properties": {
+        "parent_version": { "type": ["string", "null"], "pattern": "^v[0-9]{3}$", "description": "null for the first version" },
+        "demand_inputs": { "type": "array", "items": { "type": "string" }, "description": "Ledger files with versions, e.g. 02-demand/demand-daily-2026-08-v002.csv" },
+        "supply_inputs": { "type": "array", "items": { "type": "string" } },
+        "events_considered": { "type": "array", "items": { "type": "string", "pattern": "^EV-[0-9]{3,}$" } },
+        "questions_considered": { "type": "array", "items": { "type": "string", "pattern": "^XR-[0-9]{3,}$" } },
+        "method": { "type": "string", "description": "Model or procedure and its parameters, enough to reproduce" },
+        "trigger": { "type": "string", "description": "Why this version exists: clock (daily/weekly/monthly) or the miss/event that triggered it" }
+      }
+    },
+    "grade": {
+      "description": "Grade of the forecast as a whole = the lowest grade among its load-bearing assumptions.",
+      "$ref": "ledger-row.schema.json#/$defs/grade"
+    },
+    "status": { "type": "string", "enum": ["proposed", "approved", "superseded"] },
+    "produced_by": { "$ref": "ledger-row.schema.json#/$defs/actor" },
+    "evaluator": {
+      "type": "object",
+      "properties": {
+        "result": { "type": "string", "enum": ["pass", "block", "pending"] },
+        "notes": { "type": "string" },
+        "at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "approver": {
+      "description": "Required when status is approved or superseded. Must be a human.",
+      "type": "string",
+      "pattern": "^human:[A-Za-z][A-Za-z0-9 _-]*$"
+    },
+    "approved_at": { "type": "string", "format": "date-time" },
+    "superseded_by": { "type": "string", "pattern": "^v[0-9]{3}$" },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    { "if": { "properties": { "status": { "enum": ["approved", "superseded"] } } }, "then": { "required": ["approver", "approved_at"] } },
+    { "if": { "properties": { "status": { "const": "superseded" } } }, "then": { "required": ["superseded_by"] } }
+  ]
+}
