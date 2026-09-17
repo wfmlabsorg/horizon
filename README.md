@@ -147,9 +147,9 @@ non-trivial work with explicit success criteria and verification.
 
 ## Quick Start in a Codespace
 
-1. Create a Codespace from this repository
-2. Add `ANTHROPIC_API_KEY` as a Codespace secret
-3. Open a terminal and run `claude`
+1. Create a Codespace from this repository (Code → Codespaces → Create). First build takes a few minutes.
+2. Open a terminal and run `claude`.
+3. Sign in one of two ways when prompted: with a Claude account that carries a subscription (follow the URL, paste the code), or by adding `ANTHROPIC_API_KEY` as a Codespace secret before creating the Codespace. Either works; the setup script needs neither.
 4. Ask for the daily loop on the Halcyon book: "Run today's daily clock for halcyon"
 
 ### Example Session
