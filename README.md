@@ -145,12 +145,44 @@ Same shape for a daily note, a question card and a plan.
 **The Algorithm** (OBSERVE → THINK → PLAN → BUILD → EXECUTE → VERIFY → LEARN) structures all
 non-trivial work with explicit success criteria and verification.
 
-## Quick Start in a Codespace
+## Quick Start
+
+Phase 1 is a deterministic TypeScript clock on bun: no model calls at runtime, no dependencies
+beyond bun built-ins. The agent files in `agents/` are the behavioral spec; `Tools/clock/` is the
+code that implements them (see `Tools/clock/README.md` for the stages and the rules).
+
+```bash
+bun run sim/generate.ts                                                         # regenerate the synthetic world (18 checks PASS)
+bun run Tools/run-clock.ts daily --book halcyon --date 2026-07-22               # one daily clock (scores day 3)
+bun run Tools/run-clock.ts daily --book halcyon --from 2026-07-21 --to 2026-11-16
+bun run Tools/run-clock.ts weekly --book halcyon --week 2026-W36                # or --from 2026-W30 --to 2026-W46
+bun run Tools/run-clock.ts register-report --book halcyon --date 2026-09-13
+bun run Tools/run-clock.ts demo --book halcyon                                  # the whole scripted demo, in calendar order
+```
+
+Each daily run reconciles the ledgers (DataEngineer), scores the plan of record and decomposes the
+miss with SPC and regime detection (PostAnalyst), matches events and proposes candidates (Scout),
+opens or touches register rows with hypothesis tables (Librarian), and publishes the daily note
+(Reporter), with the Coordinator writing a run state per `schemas/run-state.schema.json`.
+
+### Scripted demo
+
+The tree carries the full run: 119 daily notes, 17 weekly reviews and two register reports for the
+Halcyon book, produced by `demo` and checked against the ground truth in
+`docs/PHASE-1-VERIFICATION.md`. Open these three first:
+
+1. `books/halcyon/08-reports/daily/2026-07-22.md` — day 3: the loop names a structural handle-time shift the humans in the real case found on day 56, opens XR-001, and asks a named human for a decision inside 48 hours.
+2. `books/halcyon/08-reports/daily/2026-09-02.md` — day 45: growth without population; XR-004 opens with five hypotheses (seasonal transactions, re-contact spillover, chat→voice overflow, incident or retries, definition change), each tagged structural or transitional with the test that settles it.
+3. `books/halcyon/08-reports/daily/2026-09-14.md` — day 57: "on a supply break, not a demand break" — a day that reads as a demand spike on every dashboard, separated from demand by productive hours and a transaction check.
+
+And then: `books/halcyon/08-reports/register/2026-09-13.md` (the register report at day 56, reconstructed as of that date), `books/halcyon/08-reports/daily/2026-08-12.md` (a quiet day, for contrast: service met target and the plan was still wrong by 2.5×), `books/halcyon/08-reports/weekly/2026-W36.md`, and `books/halcyon/06-questions/register.md` for every question the loop opened.
+
+### In a Codespace
 
 1. Create a Codespace from this repository (Code → Codespaces → Create). First build takes a few minutes.
 2. Open a terminal and run `claude`.
 3. Sign in one of two ways when prompted: with a Claude account that carries a subscription (follow the URL, paste the code), or by adding `ANTHROPIC_API_KEY` as a Codespace secret before creating the Codespace. Either works; the setup script needs neither.
-4. Ask for the daily loop on the Halcyon book: "Run today's daily clock for halcyon"
+4. Ask for the daily loop on the Halcyon book: "Run today's daily clock for halcyon" — in phase 1 that runs the commands above.
 
 ### Example Session
 
@@ -199,9 +231,9 @@ reports are markdown.
 
 Day 1 to day 40 of the Halcyon migration from Beacon to Meridian, in a Codespace.
 
-- The chain flags the handle-time shift on **day 3** (in the real case the humans saw it on day 56): a level shift for the Crestline cohort with no learning curve, a curve for the Larkspur home team, hidden in phase 1 by an oversized buffer.
+- The chain flags the handle-time shift on **day 2** and confirms it on **day 3** (in the real case the humans saw it on day 56): a level shift for the Crestline cohort with no learning curve, a curve for the Larkspur home team, hidden in phase 1 by an oversized buffer.
 - Phase 2 lands on plan and the daily note says so.
-- Growth without population is flagged on **day 44** with three hypotheses and their tests: seasonal transactions, re-contact spillover once service level breaks, and a definition change.
+- Growth without population is flagged on **day 45** with hypotheses and their tests: seasonal transactions, re-contact spillover once service level breaks, chat-to-voice overflow, and a definition change.
 - A two-day supply-side regime break (a training pull) that looks like demand is separated from the demand trend.
 - The outage day and the weather day are isolated from the trend because both are in the event ledger.
 - A bot switched off means a benchmark carried from another book is wrong by construction; the grade rule catches it.
@@ -216,12 +248,12 @@ horizon/
 ├── CLAUDE.md          identity, principles, clocks, agent table
 ├── ALGORITHM.md       the universal problem-solving framework
 ├── README.md          this file
-├── docs/DESIGN.md     the design document
+├── docs/              DESIGN.md, PHASE-1-BACKLOG.md, PHASE-1-VERIFICATION.md
 ├── agents/            11 agent definitions
 ├── skills/            17 analytical skills
 ├── context/horizon/   8 operating standards
 ├── hooks/             session and security hooks
-├── Tools/             skill index and search
+├── Tools/             skill index and search; run-clock.ts + clock/ (the phase-1 daily, weekly and register clocks)
 ├── TELOS/             mission context
 ├── MEMORY/            learnings and signals
 ├── books/             books of business (one folder per client)

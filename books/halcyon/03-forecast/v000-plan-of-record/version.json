@@ -1,0 +1,28 @@
+{
+  "version": "v000",
+  "label": "plan-of-record",
+  "horizon": "short",
+  "grain": "daily",
+  "period": { "start": "2026-07-21", "end": "2026-11-16" },
+  "scope": { "regions": ["North", "East"], "channels": ["voice", "chat", "email"] },
+  "files": { "forecast_csv": "forecast-daily.csv", "assumptions_md": "assumptions.md", "lineage_md": "lineage.md" },
+  "assumptions_ref": {
+    "path": "assumptions.md",
+    "assumption_ids": ["AS-001", "AS-002", "AS-003", "AS-004", "AS-005", "AS-006", "AS-007", "AS-008", "AS-009", "AS-010", "AS-011", "AS-012", "AS-013", "AS-014", "AS-015", "AS-016", "AS-017", "AS-018", "AS-019", "AS-020", "AS-021", "AS-022", "AS-023"]
+  },
+  "lineage": {
+    "parent_version": null,
+    "demand_inputs": ["02-demand/beacon-daily-2026-05-v001.csv", "02-demand/beacon-daily-2026-06-v001.csv", "02-demand/beacon-daily-2026-07-v001.csv"],
+    "supply_inputs": [],
+    "events_considered": ["EV-001", "EV-003", "EV-004", "EV-006", "EV-009", "EV-012"],
+    "questions_considered": [],
+    "method": "flat phase lines: 1,250 weekday transactions × regional share × weekday factor × 0.35 contacts per transaction × channel mix; handle time = Beacon agent-work mean; requirement = workload ÷ 0.85. No seasonality, no learning curve, no re-contact.",
+    "trigger": "migration start; plan of record"
+  },
+  "grade": "A",
+  "status": "approved",
+  "produced_by": "human:planning lead",
+  "approver": "human:planning lead",
+  "approved_at": "2026-07-13T17:00:00+00:00",
+  "created_at": "2026-07-13T17:00:00+00:00"
+}

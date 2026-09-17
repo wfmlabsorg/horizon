@@ -1,0 +1,104 @@
+{
+  "pipeline": "HORIZON",
+  "book": {
+    "client": "halcyon",
+    "directory": "books/halcyon"
+  },
+  "clock": "weekly",
+  "run_date": "2026-11-15",
+  "run_id": "weekly-2026-W46-r1",
+  "status": "completed",
+  "stages": [
+    {
+      "id": 1,
+      "name": "score",
+      "agent": "PostAnalyst",
+      "status": "completed",
+      "input_files": [
+        "02-demand",
+        "03-forecast/v000-plan-of-record",
+        "04-supply"
+      ],
+      "output_files": [],
+      "started_at": "2026-11-16T06:00:00+00:00",
+      "completed_at": "2026-11-16T06:05:00+00:00",
+      "notes": "variance review across the week (computed for the review; no separate file in phase 1)"
+    },
+    {
+      "id": 2,
+      "name": "reforecast",
+      "agent": "Forecaster",
+      "status": "skipped",
+      "input_files": [],
+      "output_files": [],
+      "started_at": "2026-11-16T06:05:00+00:00",
+      "completed_at": "2026-11-16T06:05:00+00:00",
+      "notes": "assumption register refresh rendered by the Reporter from observed values; no new version (phase 1)"
+    },
+    {
+      "id": 3,
+      "name": "backlog_review",
+      "agent": "Librarian",
+      "status": "completed",
+      "input_files": [
+        "06-questions/register.md"
+      ],
+      "output_files": [],
+      "started_at": "2026-11-16T06:05:00+00:00",
+      "completed_at": "2026-11-16T06:08:00+00:00",
+      "notes": "staleness flags from the register"
+    },
+    {
+      "id": 4,
+      "name": "publish",
+      "agent": "Reporter",
+      "status": "completed",
+      "input_files": [
+        "08-reports/runs/daily-*.json",
+        "06-questions/register.md"
+      ],
+      "output_files": [
+        "08-reports/weekly/2026-W46.md"
+      ],
+      "started_at": "2026-11-16T06:08:00+00:00",
+      "completed_at": "2026-11-16T06:12:00+00:00",
+      "notes": "weekly review"
+    },
+    {
+      "id": 5,
+      "name": "evaluate",
+      "agent": "Evaluator",
+      "status": "skipped",
+      "input_files": [],
+      "output_files": [],
+      "started_at": "2026-11-16T06:12:00+00:00",
+      "completed_at": "2026-11-16T06:12:00+00:00",
+      "notes": "phase 1"
+    },
+    {
+      "id": 6,
+      "name": "planner_gate",
+      "agent": "Planner",
+      "status": "skipped",
+      "input_files": [],
+      "output_files": [],
+      "started_at": "2026-11-16T06:12:00+00:00",
+      "completed_at": "2026-11-16T06:12:00+00:00",
+      "notes": "planner review of the register: not raised in the scripted demo"
+    }
+  ],
+  "gates": [
+    {
+      "name": "planner-publication",
+      "kind": "human",
+      "status": "pending",
+      "reason": "inside the planning team; review requested, not blocking"
+    }
+  ],
+  "changelog_entries": [
+    "| 2026-11-16 | `08-reports/weekly/2026-W46.md` | agent:Reporter | weekly-2026-W46-r1: weekly review 2026-W46 (2026-11-09 to 2026-11-15) |",
+    "| 2026-11-16 | `08-reports/runs/weekly-2026-W46-r1.json` | agent:Coordinator | weekly-2026-W46-r1: run state |"
+  ],
+  "created_at": "2026-11-16T06:00:00+00:00",
+  "completed_at": "2026-11-16T06:12:00+00:00"
+}

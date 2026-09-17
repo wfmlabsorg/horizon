@@ -1,0 +1,17 @@
+date,day,dow,region,platform,transactions,contacts_voice,contacts_messaging,contacts_email,contacts_total,contacts_per_transaction,voice_aht_agent_work_s,messaging_aht_agent_work_s,messaging_elapsed_h,email_aht_agent_work_s,version,actor
+2026-11-01,105,Sun,West,Beacon,591,49,113,33,195,0.33,1131,374,5.9,447,v001,agent:DataEngineer
+2026-11-02,106,Mon,West,Beacon,1585,94,218,64,376,0.237,1203,382,5.5,431,v001,agent:DataEngineer
+2026-11-03,107,Tue,West,Beacon,1562,97,225,66,388,0.248,1167,388,5.4,406,v001,agent:DataEngineer
+2026-11-04,108,Wed,West,Beacon,1562,102,238,70,410,0.262,1048,369,4.3,414,v001,agent:DataEngineer
+2026-11-05,109,Thu,West,Beacon,1348,75,173,51,299,0.222,1243,356,8.3,433,v001,agent:DataEngineer
+2026-11-06,110,Fri,West,Beacon,1266,84,196,57,337,0.266,1159,370,6.9,419,v001,agent:DataEngineer
+2026-11-07,111,Sat,West,Beacon,507,36,84,25,145,0.286,1123,384,5.9,433,v001,agent:DataEngineer
+2026-11-08,112,Sun,West,Beacon,538,42,98,29,169,0.314,1196,391,5.8,420,v001,agent:DataEngineer
+2026-11-09,113,Mon,West,Beacon,1443,91,210,62,363,0.252,1140,371,7.2,462,v001,agent:DataEngineer
+2026-11-10,114,Tue,West,Beacon,1442,86,200,59,345,0.239,1187,358,8.9,410,v001,agent:DataEngineer
+2026-11-11,115,Wed,West,Beacon,1567,96,223,65,384,0.245,1116,374,9.1,435,v001,agent:DataEngineer
+2026-11-12,116,Thu,West,Beacon,1451,87,203,59,349,0.241,1191,384,5.5,411,v001,agent:DataEngineer
+2026-11-13,117,Fri,West,Beacon,1167,78,180,53,311,0.266,1180,356,8.7,434,v001,agent:DataEngineer
+2026-11-14,118,Sat,West,Beacon,505,41,94,28,163,0.323,1194,397,5.9,456,v001,agent:DataEngineer
+2026-11-15,119,Sun,West,Beacon,573,46,106,31,183,0.319,1147,370,8.7,452,v001,agent:DataEngineer
+2026-11-16,120,Mon,West,Beacon,1366,83,193,56,332,0.243,1211,386,6,419,v001,agent:DataEngineer

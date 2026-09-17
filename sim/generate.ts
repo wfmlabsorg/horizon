@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * HORIZON · phase 0 · synthetic world generator
+ * HORIZON · synthetic world generator (phase 0 model, phase 1 output shape)
  *
  * Produces 120 days of daily and 30-minute actuals for the Halcyon Group book
  * as it migrates from Beacon (asynchronous messaging, no timeout) to Meridian
@@ -359,6 +359,7 @@ const travelerRows: Record<string, unknown>[] = [];
 const supplyRows: SupplyRow[] = [];
 const beaconRows: Record<string, unknown>[] = [];
 const truthRows: Truth[] = [];
+const regionWeights = new Map<number, Record<Region, number>>(); // transaction weight per migrated region, for the region split of the export
 
 // Intraday profile (48 half-hours), planning-org local time; North and East share a time zone in this world.
 const PROFILE = Array.from({ length: 48 }, (_, i) => {
@@ -405,6 +406,8 @@ for (let day = 1; day <= P.days; day++) {
   }
   const migratedRegions = REGIONS.filter((r) => migrated(day, r));
   const txMigrated = migratedRegions.reduce((a, r) => a + tx[r], 0);
+  regionWeights.set(day, { North: 0, East: 0, West: 0 });
+  for (const r of migratedRegions) regionWeights.get(day)![r] = tx[r] * weatherRatio(day, r);
 
   // --- feedback multipliers from yesterday's state (lagged, so no fixed point)
   const fb = clamp(ewmaChatAbandon / P.ewmaRef, 0, 1);
@@ -569,44 +572,274 @@ const eventRows = [
 ];
 
 // ---------------------------------------------------------------------------
-// 6. Plan of record v000 (the wrong assumptions, faithfully applied)
+// 6. Plan of record v000 (the wrong assumptions, faithfully applied), by region × channel
 // ---------------------------------------------------------------------------
 const planRows: Record<string, unknown>[] = [];
 for (let day = 1; day <= P.days; day++) {
-  const scope = day >= P.phase2Day ? "North+East" : day >= P.phase1Day ? "North" : "none";
-  const share = (day >= P.phase1Day ? P.regionShare.North : 0) + (day >= P.phase2Day ? P.regionShare.East : 0);
-  const txPlan = P.txWeekdayBase * share * P.dowTx[dow(day)]; // flat phase line, no seasonality
-  const contacts = txPlan * P.plan.ratio;
-  for (const ch of CHANNELS) {
-    const off = contacts * P.mix[ch];
-    const aht = P.refAht[ch];
-    const work = (off * aht) / 3600;
-    planRows.push({
-      date: dateOf(day), day, dow: DOW[dow(day)], region_scope: scope, channel: ch, fc_transactions: r0(txPlan), fc_contacts_per_transaction: P.plan.ratio,
-      fc_offered: r1(off), fc_aht_sec: aht, fc_workload_hours: r2(work), fc_required_productive_hours: r2(work / P.plan.occupancy),
-      sl_target: ch === "voice" ? "80% in 20 s" : ch === "chat" ? "80% in 3 min" : "90% in 2 h",
-      planned_crestline_heads: day >= P.phase2Day ? P.plan.crestlineHeads.phase2 : P.plan.crestlineHeads.phase1,
-      planned_home_heads: day >= P.homeLiveDay ? P.plan.homeHeads : 0,
-      forecast_version: "v000", assumption_ref: "assumptions.md",
-    });
+  for (const r of REGIONS) {
+    if (!migrated(day, r)) continue;
+    const txPlan = P.txWeekdayBase * P.regionShare[r] * P.dowTx[dow(day)]; // flat phase line, no seasonality
+    const contacts = txPlan * P.plan.ratio;
+    for (const ch of CHANNELS) {
+      const off = contacts * P.mix[ch];
+      const aht = P.refAht[ch];
+      const work = (off * aht) / 3600;
+      planRows.push({
+        date: dateOf(day), day, dow: DOW[dow(day)], region: r, channel: ch, platform: "Meridian",
+        fc_transactions: r1(txPlan), fc_contacts_per_transaction: P.plan.ratio,
+        offered_fc: r1(off), aht_agent_work_fc_s: aht, fc_workload_h: r2(work), fc_required_productive_h: r2(work / P.plan.occupancy),
+        sl_target: ch === "voice" ? "80% in 20 s" : ch === "chat" ? "80% in 3 min" : "90% in 2 h",
+        planned_crestline_heads: day >= P.phase2Day ? P.plan.crestlineHeads.phase2 : P.plan.crestlineHeads.phase1,
+        planned_home_heads: day >= P.homeLiveDay ? P.plan.homeHeads : 0,
+        grade: "E", assumption_ids: `AS-008;AS-010;AS-0${ch === "voice" ? "11" : ch === "chat" ? "12" : "13"};AS-015`, forecast_version: "v000",
+      });
+    }
   }
 }
 
 // ---------------------------------------------------------------------------
-// 7. Write everything
+// 7. Write everything — schema column names, versioned monthly files
+//
+// Phase 1 decision (docs/PHASE-1-BACKLOG.md item 1): the ledger conventions win.
+// Column names follow /schemas/demand-daily.schema.json and supply-daily.schema.json;
+// file names follow books/README.md: <what>-<period>-v<nnn>.csv with one file per
+// calendar month (the source systems deliver monthly pulls; the DataEngineer reads the
+// rows for one date out of the month file and stamps the reconciliation per day).
+// Nothing above this line changed, so the RNG sequence and every planted effect are
+// identical to phase 0; only the output shape differs.
 // ---------------------------------------------------------------------------
-const DEF = {
-  common: `Definitions cited (see \`books/halcyon/01-definitions/\`): **Offered**, **Handled**, **Handled in SL**, **Abandoned**, **ASA**, **Service Level**, **AHT (elapsed)** → \`aht_sec\`, **AHT (agent work)** → \`aht_agent_sec\`. Service level is \`handled_in_sl / offered\`. For chat, \`aht_sec\` is elapsed session time and \`aht_agent_sec\` is agent work time (elapsed ÷ effective concurrency); for voice and email the two are equal. The plan of record carried **AHT (agent work)** — compare like with like.`,
-};
-writeCsv(OUT.demand, "daily-channel", demandRows, `Daily actuals by channel for the Halcyon book on Meridian, days 1–${P.days} (${dateOf(1)} to ${dateOf(P.days)}). One row per date × channel (voice, chat, email). Day 1 is pre-go-live and carries zeros.\n\n${DEF.common}`);
-writeCsv(OUT.demand, "interval-30min", intervalRows, `30-minute interval actuals for chat and voice, planning-org local time (North and East share a time zone in this world). Interval rows sum exactly to \`daily-channel.csv\` for offered, handled, handled_in_sl and abandoned.\n\n${DEF.common}`);
-writeCsv(OUT.demand, "daily-cohort", cohortRows, `Handled contacts and AHT by cohort (Crestline Services, Larkspur home team) and channel — the agent-group view. \`handled\` sums to \`daily-channel.csv\`. Definitions: **Handled**, **AHT (elapsed)**, **AHT (agent work)**, **Productive hours** (copied from the supply ledger for convenience).`);
-writeCsv(OUT.demand, "daily-transactions", txRows, `Transactions per day by region for the whole Halcyon book (all three regions, whatever platform they are on) with the platform each region is on that day. Definition: **Transaction** (a booking, change or cancellation completed in the travel system, independent of any contact).`);
-writeCsv(OUT.demand, "daily-travelers", travelerRows, `Distinct travelers contacting per day on Meridian and contacts per traveler-day, with transactions for the migrated regions and the resulting contacts per transaction. Definitions: **Contact**, **Distinct traveler**, **Contacts per traveler-day**, **Contacts per transaction**.`);
-writeCsv(OUT.demand, "beacon-daily", beaconRows, `Beacon history by region: ${P.beaconLookbackDays} days before day 1 for all regions, then each region while it remains on Beacon (East to day ${P.phase2Day - 1}, West throughout). Beacon messaging is asynchronous with no timeout, so \`messaging_elapsed_hours\` is hours and only \`messaging_aht_agent_sec\` is comparable to Meridian chat **AHT (agent work)**. Definitions: **Transaction**, **Contact**, **Contacts per transaction**, **AHT (agent work)**.`);
-writeCsv(OUT.supply, "daily-supply", supplyRows, `Supply by cohort per day. Definitions: **Scheduled hours** (rostered), **Staffed hours** (scheduled minus absence), **Productive hours** (staffed minus in-day shrinkage: breaks, coaching, training), **Agents scheduled**, **Agents in training**, **Shrinkage (in-day)** = 1 − productive/staffed. During nesting the home team's productive hours are counted at ${P.nestingProductivity * 100}% of staffed. Headcount is contracted heads on the book.`);
-writeCsv(OUT.events, "events", eventRows, `The intelligence ledger: typed, dated events with an effect window and a grade. Planned items and surprises are both here with their true dates (\`planned\` = yes/no). Grades: [M] measured from a system record · [A] asserted by one source · [E] estimated. \`expected_signature\` says what an analyst should see in the demand and supply ledgers.`);
-writeCsv(OUT.plan, "forecast-daily", planRows, `Plan of record v000: the original daily forecast by channel for days 1–${P.days}, built on the assumptions in \`assumptions.md\` (whole-book contacts-per-transaction of ${P.plan.ratio}, Beacon AHT carried as **AHT (agent work)**, flat phase lines with a weekday shape and no seasonal ramp). Required productive hours are workload ÷ ${P.plan.occupancy} occupancy.`);
+const VERSION = "v001";
+const ACTOR = "agent:DataEngineer";
+const COHORT_KEY: Record<Cohort, string> = { "Crestline Services": "vendor", "Larkspur home team": "home-team" };
+
+type ColMeta = [column: string, definition: string, grade: string, note: string];
+function sidecar(what: string, period: string, rows: number, purpose: string, cols: ColMeta[], extra = ""): string {
+  const table = cols.map(([c, d, g, n]) => `| \`${c}\` | ${d ? `\`${d}\`` : "—"} | ${g || "—"} | ${n} |`).join("\n");
+  return `# ${what}-${period}-${VERSION}.csv
+
+**Ledger:** ${what} · **Period:** ${period} · **Version:** ${VERSION} · **Supersedes:** none
+**Source system:** synthetic export (\`sim/generate.ts\`, seed ${P.seed}) standing in for the platform export · **Pulled at:** ${period}-01T06:00:00+00:00 (simulated monthly pull; the daily clock reads only rows dated on or before its run date)
+**Written by:** ${ACTOR} · **Reconciled:** per day, see \`RECONCILIATION.md\` in this folder
+
+${purpose}
+
+## Columns, definitions and grades
+
+| column | definition (slug in \`01-definitions/\`) | grade | note |
+|---|---|---|---|
+${table}
+${extra ? "\n" + extra + "\n" : ""}
+## Provenance
+
+Synthetic data with a recorded ground truth in \`sim/GROUND-TRUTH.md\`; regenerate with \`bun run sim/generate.ts\`. Rows in this file: ${rows}. A re-pull would be \`${VERSION.replace(/\d+$/, (n) => String(Number(n) + 1).padStart(3, "0"))}\` with \`supersedes: ${VERSION}\`; this file is never overwritten.
+`;
+}
+
+function writeLedger(dir: string, what: string, rows: Record<string, unknown>[], purpose: string, cols: ColMeta[], extra = ""): string[] {
+  const byMonth = new Map<string, Record<string, unknown>[]>();
+  for (const r of rows) {
+    const m = String(r.date).slice(0, 7);
+    if (!byMonth.has(m)) byMonth.set(m, []);
+    byMonth.get(m)!.push(r);
+  }
+  const written: string[] = [];
+  for (const [m, rs] of [...byMonth.entries()].sort()) {
+    const name = `${what}-${m}-${VERSION}`;
+    writeFileSync(join(dir, `${name}.csv`), csv(rs));
+    writeFileSync(join(dir, `${name}.md`), sidecar(what, m, rs.length, purpose, cols, extra));
+    written.push(`${name}.csv`);
+  }
+  return written;
+}
+
+// --- demand-daily: date × region × channel × platform (allocated from the channel-day totals)
+const demandDailyOut: Record<string, unknown>[] = [];
+for (let day = 1; day <= P.days; day++) {
+  const regs = REGIONS.filter((r) => migrated(day, r));
+  if (!regs.length) continue;
+  const w = regs.map((r) => (regionWeights.get(day)?.[r] ?? 0));
+  for (const ch of CHANNELS) {
+    const d = demandRows.find((r) => r.day === day && r.channel === ch)!;
+    const off = allocate(d.offered, w);
+    const ab = allocate(d.abandoned, off.map((o) => o), off);
+    const hd = off.map((o, i) => o - ab[i]);
+    const inSl = allocate(d.handled_in_sl, hd.map((h) => h), hd);
+    regs.forEach((r, i) => {
+      demandDailyOut.push({
+        date: d.date, day, dow: d.dow, region: r, channel: ch, platform: "Meridian",
+        offered: off[i], handled: hd[i], handled_in_sl: inSl[i], abandoned: ab[i],
+        asa_s: off[i] > 0 ? d.asa_sec : 0, sl_pct: off[i] > 0 ? r1((100 * inSl[i]) / off[i]) : 0,
+        aht_elapsed_s: off[i] > 0 ? d.aht_sec : 0, aht_agent_work_s: off[i] > 0 ? d.aht_agent_sec : 0,
+        version: VERSION, actor: ACTOR,
+      });
+    });
+  }
+}
+const AHT_NOTE = "Chat: `aht_elapsed_s` is wall-clock session time including the customer's wait up to the 600 s inactivity timeout and time on concurrent chats; `aht_agent_work_s` is elapsed ÷ effective concurrency. Voice and email: the two are equal. **Never labelled AHT.** The plan of record cites `aht-agent-work`; compare like with like.";
+writeLedger(OUT.demand, "demand-daily", demandDailyOut,
+  `Daily actuals by region × channel on Meridian. Regions appear from their go-live day (North day 2, East day 37). Offered, handled, handled-in-SL and abandoned are split from the skill-level export by region of the traveler profile (largest-remainder allocation on transaction weight, stated here because the export is by skill); handle time and ASA are measured at skill level and are therefore identical across regions on a day.\n\n${AHT_NOTE}`,
+  [
+    ["date", "", "", "Day 1 = 2026-07-20 (Mon); `day` and `dow` are convenience columns"],
+    ["region", "", "", "North · East (West is on Beacon in this window)"],
+    ["channel", "", "", "voice · chat · email"],
+    ["platform", "", "", "Meridian"],
+    ["offered", "offered", "[M]", "email: arrivals"],
+    ["handled", "handled", "[M]", "email: = offered (no abandons; backlog carried)"],
+    ["handled_in_sl", "handled-in-sl", "[M]", "threshold voice 20 s · chat 180 s · email 7,200 s"],
+    ["abandoned", "abandoned", "[M]", "chat: customer exits before answer; post-answer timeouts are not abandons"],
+    ["asa_s", "asa", "[C]", "email: first-response time"],
+    ["sl_pct", "service-level", "[C]", "`handled_in_sl ÷ offered × 100` (no short-abandon exclusion in this export)"],
+    ["aht_elapsed_s", "aht-elapsed", "[M]", "see note above"],
+    ["aht_agent_work_s", "aht-agent-work", "[C]", "the staffing number; chat = elapsed ÷ `concurrency_eff` (04-supply)"],
+    ["version", "", "", "ledger file version"],
+    ["actor", "", "", "who wrote the row"],
+  ],
+  "Reconciliation identities (DataEngineer): `offered = handled + abandoned` on voice and chat; `handled = offered` on email; `handled_in_sl ≤ handled`; the sum over regions of a channel-day equals the sum of that channel-day's rows in `demand-interval`; the sum over regions of `handled` equals the sum over cohorts in `demand-cohort`.");
+
+// --- demand-interval: 30-minute × channel (skill level; no region split at interval grain)
+const intervalOut = intervalRows.map((r) => ({
+  date: r.date, day: r.day, interval_start: r.interval_start, channel: r.channel, platform: "Meridian",
+  offered: r.offered, handled: r.handled, handled_in_sl: r.handled_in_sl, abandoned: r.abandoned,
+  asa_s: r.asa_sec, sl_pct: r.sl_pct, aht_elapsed_s: r.aht_sec, aht_agent_work_s: r.aht_agent_sec, version: VERSION, actor: ACTOR,
+}));
+writeLedger(OUT.demand, "demand-interval", intervalOut,
+  `30-minute interval actuals for chat and voice at skill level, planning-org local time (North and East share a time zone in this world). Interval rows sum exactly to the channel-day totals in \`demand-daily\` (summed over regions) for offered, handled, handled_in_sl and abandoned; ASA and handle times are interval means.\n\n${AHT_NOTE}`,
+  [
+    ["date", "", "", ""], ["interval_start", "", "", "HH:MM, 48 bins"], ["channel", "", "", "voice · chat"], ["platform", "", "", "Meridian"],
+    ["offered", "offered", "[M]", ""], ["handled", "handled", "[M]", ""], ["handled_in_sl", "handled-in-sl", "[M]", ""], ["abandoned", "abandoned", "[M]", ""],
+    ["asa_s", "asa", "[C]", ""], ["sl_pct", "service-level", "[C]", ""], ["aht_elapsed_s", "aht-elapsed", "[M]", ""], ["aht_agent_work_s", "aht-agent-work", "[C]", ""],
+    ["version", "", "", ""], ["actor", "", "", ""],
+  ]);
+
+// --- demand-cohort: date × cohort × channel
+const cohortOut = cohortRows.map((r) => ({
+  date: r.date, day: r.day, cohort: COHORT_KEY[r.cohort as Cohort], team: r.cohort, channel: r.channel, platform: "Meridian",
+  handled: r.handled, aht_elapsed_s: r.aht_sec, aht_agent_work_s: r.aht_agent_sec, productive_h: r.productive_hours, version: VERSION, actor: ACTOR,
+}));
+writeLedger(OUT.demand, "demand-cohort", cohortOut,
+  `Handled contacts and handle time by cohort (\`vendor\` = Crestline Services, \`home-team\` = Larkspur home team) and channel: the agent-group view. \`handled\` sums to the channel-day total in \`demand-daily\`. \`productive_h\` is the cohort's whole-day productive hours copied from \`04-supply\` for convenience; the supply ledger is authoritative.\n\n${AHT_NOTE}`,
+  [
+    ["date", "", "", ""], ["cohort", "", "", "vendor · home-team (schema enum)"], ["team", "", "", "Crestline Services · Larkspur home team"], ["channel", "", "", ""], ["platform", "", "", ""],
+    ["handled", "handled", "[M]", ""], ["aht_elapsed_s", "aht-elapsed", "[M]", "per cohort"], ["aht_agent_work_s", "aht-agent-work", "[C]", "per cohort"],
+    ["productive_h", "productive-hours", "[M]", "whole cohort-day, all channels; from 04-supply"], ["version", "", "", ""], ["actor", "", "", ""],
+  ]);
+
+// --- transactions-daily: date × region, platform tagged
+const txOut = txRows.map((r) => ({ ...r, version: VERSION, actor: ACTOR }));
+writeLedger(OUT.demand, "transactions-daily", txOut,
+  "Transactions per day by region for the whole Halcyon book (all three regions, whatever platform each is on) with the platform the region is on that day. The booking platform is unchanged by the migration, so this count is comparable across the Beacon → Meridian boundary.",
+  [["date", "", "", ""], ["region", "", "", "North · East · West"], ["platform", "", "", "Beacon · Meridian, by region and day"], ["transactions", "transaction", "[M]", "bookings, changes and cancellations completed in the travel system"], ["version", "", "", ""], ["actor", "", "", ""]]);
+
+// --- travelers-daily: date (Meridian scope)
+const travelersOut = travelerRows.map((r) => ({
+  date: r.date, day: r.day, dow: r.dow, platform: r.platform, contacts: r.contacts, active_travelers: r.distinct_travelers,
+  contacts_per_traveler_day: r.contacts_per_traveler_day, transactions_migrated_regions: r.transactions_migrated_regions,
+  contacts_per_transaction: r.contacts_per_transaction, version: VERSION, actor: ACTOR,
+}));
+writeLedger(OUT.demand, "travelers-daily", travelersOut,
+  "Distinct travelers contacting per day on Meridian, contacts per traveler-day, and contacts per transaction for the migrated regions. The ratio here is a per-platform ratio (Meridian, migrated regions), not the whole-book ratio; see `contacts-per-transaction` for the composition trap.",
+  [["date", "", "", ""], ["platform", "", "", "Meridian"], ["contacts", "contact", "[M]", "sum of offered across channels"], ["active_travelers", "contacts-per-traveler-day", "[E]", "population input; distinct travelers contacting that day"],
+   ["contacts_per_traveler_day", "contacts-per-traveler-day", "[C]", "`contacts ÷ active_travelers`"], ["transactions_migrated_regions", "transaction", "[M]", "sum over regions on Meridian that day"],
+   ["contacts_per_transaction", "contacts-per-transaction", "[C]", "Meridian, migrated regions only"], ["version", "", "", ""], ["actor", "", "", ""]]);
+
+// --- beacon-daily: the legacy-platform history by region
+const beaconOut = beaconRows.map((r) => ({
+  date: r.date, day: r.day, dow: r.dow, region: r.region, platform: r.platform, transactions: r.transactions,
+  contacts_voice: r.contacts_voice, contacts_messaging: r.contacts_messaging, contacts_email: r.contacts_email, contacts_total: r.contacts_total,
+  contacts_per_transaction: r.contacts_per_transaction, voice_aht_agent_work_s: r.voice_aht_sec, messaging_aht_agent_work_s: r.messaging_aht_agent_sec,
+  messaging_elapsed_h: r.messaging_elapsed_hours, email_aht_agent_work_s: r.email_aht_sec, version: VERSION, actor: ACTOR,
+}));
+writeLedger(OUT.demand, "beacon-daily", beaconOut,
+  `Beacon history by region: ${P.beaconLookbackDays} days before day 1 for all regions, then each region while it remains on Beacon (East to day ${P.phase2Day - 1}, West throughout). Beacon messaging is asynchronous with no timeout, so \`messaging_elapsed_h\` is hours and only \`messaging_aht_agent_work_s\` is comparable to Meridian chat \`aht-agent-work\`. Numbers from this file carried into a Meridian forecast are [E] at best, with the bridge assumption named.`,
+  [["date", "", "", "negative `day` values are before migration day 1"], ["region", "", "", ""], ["platform", "", "", "Beacon"], ["transactions", "transaction", "[M]", ""],
+   ["contacts_voice", "contact", "[M]", ""], ["contacts_messaging", "contact", "[M]", "Beacon messaging maps to Meridian chat for mix purposes only"], ["contacts_email", "contact", "[M]", ""], ["contacts_total", "contact", "[M]", ""],
+   ["contacts_per_transaction", "contacts-per-transaction", "[C]", "per region, Beacon"], ["voice_aht_agent_work_s", "aht-agent-work", "[M]", "= elapsed on voice; the 1,150 s baseline the plan carried"],
+   ["messaging_aht_agent_work_s", "aht-agent-work", "[M]", "the only messaging figure comparable to Meridian chat"], ["messaging_elapsed_h", "aht-elapsed", "[M]", "hours; not comparable to anything on Meridian"],
+   ["email_aht_agent_work_s", "aht-agent-work", "[M]", ""], ["version", "", "", ""], ["actor", "", "", ""]]);
+
+// --- supply-daily: date × region(all) × channel(all) × cohort, shrinkage split, occupancy, concurrency
+const workByCohortDay = new Map<string, number>();
+for (const r of cohortRows) {
+  const k = `${r.day}|${r.cohort}`;
+  workByCohortDay.set(k, (workByCohortDay.get(k) ?? 0) + ((r.handled as number) * (r.aht_agent_sec as number)) / 3600);
+}
+const supplyOut = supplyRows.map((r) => {
+  const sched = r.scheduled_hours, staffed = r.staffed_hours, prod = r.productive_hours;
+  const absence = sched > 0 ? 1 - staffed / sched : 0; // unplanned: absence and lateness
+  const inDay = staffed > 0 ? 1 - prod / staffed : 0; // in-day loss on staffed hours
+  const pull = r.cohort === "Crestline Services" && r.day >= P.trainingPull.start && r.day <= P.trainingPull.end;
+  // Planned in-day shrinkage is the contracted 18 % (breaks, coaching, scheduled training); on the pull days the
+  // excess over 18 % is off-schedule and therefore unplanned (shrinkage.md: a training pull off the published
+  // schedule is unplanned shrinkage on the day it happens). Classroom (100 %) and nesting (81 %) are planned.
+  const inDayUnplanned = pull ? Math.max(0, inDay - P.inDayShrinkage) : 0;
+  const total = sched > 0 ? 1 - prod / sched : 0;
+  const unplanned = sched > 0 ? absence + inDayUnplanned * (staffed / sched) : 0;
+  const planned = Math.max(0, total - unplanned);
+  const work = workByCohortDay.get(`${r.day}|${r.cohort}`) ?? 0;
+  const t = truthRows[r.day - 1];
+  return {
+    date: r.date, day: r.day, dow: r.dow, region: "all", channel: "all", cohort: COHORT_KEY[r.cohort], team: r.cohort,
+    scheduled_h: sched, staffed_h: staffed, productive_h: prod,
+    shrink_planned_pct: r1(100 * planned), shrink_unplanned_pct: r1(100 * unplanned),
+    occupancy_pct: prod > 0 ? r1((100 * work) / prod) : 0,
+    concurrency_eff: r.day >= P.phase1Day ? r2(t.chat_concurrency) : 0,
+    headcount: r.headcount, headcount_in_training: r.agents_in_training, agents_scheduled: r.agents_scheduled, status: r.status,
+    version: VERSION, actor: ACTOR,
+  };
+});
+writeLedger(OUT.supply, "supply-daily", supplyOut,
+  `Supply by cohort per day. Both cohorts are blended pools across all channels and both migrated regions, so \`region\` and \`channel\` carry \`all\` (the supply schema allows \`all\` for a blended pool; a dedicated split would be a computed allocation, not a measurement, and is not stored). Vendor schedules arrive as headcount; hours are derived at ${P.shiftHours} h per scheduled shift.`,
+  [
+    ["date", "", "", ""], ["region", "", "", "`all` — blended pool"], ["channel", "", "", "`all` — blended pool"], ["cohort", "", "", "vendor · home-team"], ["team", "", "", "Crestline Services · Larkspur home team"],
+    ["scheduled_h", "scheduled-hours", "[M]", "`agents_scheduled × 8`, plus classroom hours for a cohort in training"],
+    ["staffed_h", "staffed-hours", "[M]", "scheduled minus absence"],
+    ["productive_h", "productive-hours", "[C]", "staffed minus in-day shrinkage; nesting counted at 25 % of staffed"],
+    ["shrink_planned_pct", "shrinkage", "[C]", "base = scheduled hours; breaks, coaching, scheduled training, classroom, nesting"],
+    ["shrink_unplanned_pct", "shrinkage", "[C]", "base = scheduled hours; absence, lateness, and any in-day loss above the contracted 18 % (an off-schedule pull)"],
+    ["occupancy_pct", "occupancy", "[C]", "`Σ(handled × aht_agent_work_s) ÷ 3600 ÷ productive_h`, agent-work numerator, from demand-cohort"],
+    ["concurrency_eff", "concurrency", "[C] home-team / [E] vendor", "effective chat concurrency for the day; the configured ceiling is 3"],
+    ["headcount", "fte", "[M]", "contracted (vendor) or assigned (home team) heads on the book"],
+    ["headcount_in_training", "fte", "[M]", "classroom, nesting, or pulled into a session that day"],
+    ["agents_scheduled", "", "[M]", "heads rostered to a shift; extra column beyond the schema"],
+    ["status", "", "", "readiness · phase-1 hypercare · phase-2 steady state · surge add · classroom training · nesting · live · not yet engaged"],
+    ["version", "", "", ""], ["actor", "", "", ""],
+  ],
+  "Identity: `shrink_planned_pct + shrink_unplanned_pct = (1 − productive_h ÷ scheduled_h) × 100` within rounding.");
+
+// --- events (append ledger; one file, not versioned by period)
+writeFileSync(join(OUT.events, "events.csv"), csv(eventRows));
+writeFileSync(join(OUT.events, "events.md"), `# events.csv\n\nThe intelligence ledger: typed, dated events with an effect window and a grade. Planned items and surprises are both here with their true dates (\`planned\` = yes/no). Grades: [M] measured from a system record · [A] asserted by one source · [E] estimated. \`expected_signature\` says what an analyst should see in the demand and supply ledgers. Rows here are the accepted ledger; Scout proposals live in \`proposed/\` until a planner accepts them.\n\n## Provenance\n\nGenerated by \`sim/generate.ts\` (seed ${P.seed}); synthetic data with a recorded ground truth in \`sim/GROUND-TRUTH.md\`. Regenerate with \`bun run sim/generate.ts\`. Rows: ${eventRows.length}.\n`);
+
+// --- plan of record v000, by region × channel
+const planOut = planRows.map((r) => r);
+writeFileSync(join(OUT.plan, "forecast-daily.csv"), csv(planOut));
+writeFileSync(join(OUT.plan, "forecast-daily.md"), `# forecast-daily.csv — v000 plan of record
+
+Plan of record v000: the original daily forecast by region × channel for days 2–${P.days}, built on the assumptions in \`assumptions.md\` (whole-book contacts-per-transaction of ${P.plan.ratio} applied to every migrated region, Beacon handle times carried across the platform change, flat phase lines with a weekday shape and no seasonal ramp). Regions enter the plan on their go-live day (North day 2, East day 37).
+
+## Columns
+
+| column | definition | grade | note |
+|---|---|---|---|
+| \`date\`, \`day\`, \`dow\` | — | — | |
+| \`region\`, \`channel\`, \`platform\` | — | — | Meridian |
+| \`fc_transactions\` | \`transaction\` | [C] | 1,250 × regional share × weekday factor (AS-001, AS-002, AS-004) |
+| \`fc_contacts_per_transaction\` | \`contacts-per-transaction\` | [A] | 0.35, the whole-book Beacon ratio carried to each region (AS-008) — the composition trap |
+| \`offered_fc\` | \`offered\` | [C] | \`fc_transactions × 0.35 × channel mix\` (AS-010) |
+| \`aht_agent_work_fc_s\` | \`aht-agent-work\` | [E] | **cites aht-agent-work**: Beacon agent-work time carried across the platform change without a bridge (AS-011, AS-012, AS-013). Any comparison to a Meridian \`aht_elapsed_s\` figure is a different definition |
+| \`fc_workload_h\` | \`requirement-hours\` (numerator) | [C] | \`offered_fc × aht_agent_work_fc_s ÷ 3600\` |
+| \`fc_required_productive_h\` | \`requirement-hours\` | [C] | workload ÷ ${P.plan.occupancy} (AS-015) |
+| \`sl_target\` | \`service-level\` | [A] | contract (AS-020) |
+| \`planned_crestline_heads\`, \`planned_home_heads\` | \`fte\` | [A] | AS-017, AS-018, AS-019 |
+| \`grade\` | — | — | E: the lowest grade among the row's load-bearing assumptions |
+| \`assumption_ids\` | — | — | register rows the row depends on |
+
+## Provenance
+
+Generated by \`sim/generate.ts\` (seed ${P.seed}); synthetic data with a recorded ground truth in \`sim/GROUND-TRUTH.md\`. Regenerate with \`bun run sim/generate.ts\`. Rows: ${planOut.length}.
+`);
+
+// --- ground truth (not part of the book)
 writeCsv(OUT.sim, "ground-truth-daily", truthRows as unknown as Record<string, unknown>[], `Day-level latent variables of the generator — the ground truth the agent chain is supposed to recover. Not part of the book. \`rho\` is workload ÷ capacity in reference-AHT hours; \`overflow_mult\` multiplies voice contacts; \`spillover_mult\` multiplies contacts per transaction.`);
 
 // ---------------------------------------------------------------------------

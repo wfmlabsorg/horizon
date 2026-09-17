@@ -1,0 +1,97 @@
+date,day,cohort,team,channel,platform,handled,aht_elapsed_s,aht_agent_work_s,productive_h,version,actor
+2026-11-01,105,vendor,Crestline Services,voice,Meridian,27,2009,2009,100.7,v001,agent:DataEngineer
+2026-11-01,105,home-team,Larkspur home team,voice,Meridian,13,1479,1479,37.6,v001,agent:DataEngineer
+2026-11-01,105,vendor,Crestline Services,chat,Meridian,53,1097,548,100.7,v001,agent:DataEngineer
+2026-11-01,105,home-team,Larkspur home team,chat,Meridian,25,885,442,37.6,v001,agent:DataEngineer
+2026-11-01,105,vendor,Crestline Services,email,Meridian,16,465,465,100.7,v001,agent:DataEngineer
+2026-11-01,105,home-team,Larkspur home team,email,Meridian,7,530,530,37.6,v001,agent:DataEngineer
+2026-11-02,106,vendor,Crestline Services,voice,Meridian,47,2110,2110,122,v001,agent:DataEngineer
+2026-11-02,106,home-team,Larkspur home team,voice,Meridian,21,1345,1345,44.1,v001,agent:DataEngineer
+2026-11-02,106,vendor,Crestline Services,chat,Meridian,91,1182,591,122,v001,agent:DataEngineer
+2026-11-02,106,home-team,Larkspur home team,chat,Meridian,42,970,485,44.1,v001,agent:DataEngineer
+2026-11-02,106,vendor,Crestline Services,email,Meridian,28,474,474,122,v001,agent:DataEngineer
+2026-11-02,106,home-team,Larkspur home team,email,Meridian,12,499,499,44.1,v001,agent:DataEngineer
+2026-11-03,107,vendor,Crestline Services,voice,Meridian,58,1961,1961,123.7,v001,agent:DataEngineer
+2026-11-03,107,home-team,Larkspur home team,voice,Meridian,26,1396,1396,44.4,v001,agent:DataEngineer
+2026-11-03,107,vendor,Crestline Services,chat,Meridian,113,1074,537,123.7,v001,agent:DataEngineer
+2026-11-03,107,home-team,Larkspur home team,chat,Meridian,52,924,462,44.4,v001,agent:DataEngineer
+2026-11-03,107,vendor,Crestline Services,email,Meridian,34,466,466,123.7,v001,agent:DataEngineer
+2026-11-03,107,home-team,Larkspur home team,email,Meridian,15,525,525,44.4,v001,agent:DataEngineer
+2026-11-04,108,vendor,Crestline Services,voice,Meridian,55,2037,2037,127.2,v001,agent:DataEngineer
+2026-11-04,108,home-team,Larkspur home team,voice,Meridian,24,1367,1367,43.4,v001,agent:DataEngineer
+2026-11-04,108,vendor,Crestline Services,chat,Meridian,108,1077,539,127.2,v001,agent:DataEngineer
+2026-11-04,108,home-team,Larkspur home team,chat,Meridian,47,912,456,43.4,v001,agent:DataEngineer
+2026-11-04,108,vendor,Crestline Services,email,Meridian,32,462,462,127.2,v001,agent:DataEngineer
+2026-11-04,108,home-team,Larkspur home team,email,Meridian,14,530,530,43.4,v001,agent:DataEngineer
+2026-11-05,109,vendor,Crestline Services,voice,Meridian,48,2066,2066,123.5,v001,agent:DataEngineer
+2026-11-05,109,home-team,Larkspur home team,voice,Meridian,21,1371,1371,42.8,v001,agent:DataEngineer
+2026-11-05,109,vendor,Crestline Services,chat,Meridian,95,1125,563,123.5,v001,agent:DataEngineer
+2026-11-05,109,home-team,Larkspur home team,chat,Meridian,42,899,449,42.8,v001,agent:DataEngineer
+2026-11-05,109,vendor,Crestline Services,email,Meridian,28,435,435,123.5,v001,agent:DataEngineer
+2026-11-05,109,home-team,Larkspur home team,email,Meridian,13,529,529,42.8,v001,agent:DataEngineer
+2026-11-06,110,vendor,Crestline Services,voice,Meridian,46,2028,2028,120.7,v001,agent:DataEngineer
+2026-11-06,110,home-team,Larkspur home team,voice,Meridian,21,1269,1269,44.2,v001,agent:DataEngineer
+2026-11-06,110,vendor,Crestline Services,chat,Meridian,91,1135,568,120.7,v001,agent:DataEngineer
+2026-11-06,110,home-team,Larkspur home team,chat,Meridian,43,914,457,44.2,v001,agent:DataEngineer
+2026-11-06,110,vendor,Crestline Services,email,Meridian,27,460,460,120.7,v001,agent:DataEngineer
+2026-11-06,110,home-team,Larkspur home team,email,Meridian,13,483,483,44.2,v001,agent:DataEngineer
+2026-11-07,111,vendor,Crestline Services,voice,Meridian,19,1929,1929,97.8,v001,agent:DataEngineer
+2026-11-07,111,home-team,Larkspur home team,voice,Meridian,10,1393,1393,37.6,v001,agent:DataEngineer
+2026-11-07,111,vendor,Crestline Services,chat,Meridian,38,1093,547,97.8,v001,agent:DataEngineer
+2026-11-07,111,home-team,Larkspur home team,chat,Meridian,19,907,454,37.6,v001,agent:DataEngineer
+2026-11-07,111,vendor,Crestline Services,email,Meridian,11,515,515,97.8,v001,agent:DataEngineer
+2026-11-07,111,home-team,Larkspur home team,email,Meridian,6,502,502,37.6,v001,agent:DataEngineer
+2026-11-08,112,vendor,Crestline Services,voice,Meridian,26,1952,1952,101.9,v001,agent:DataEngineer
+2026-11-08,112,home-team,Larkspur home team,voice,Meridian,13,1355,1355,37.3,v001,agent:DataEngineer
+2026-11-08,112,vendor,Crestline Services,chat,Meridian,53,1101,551,101.9,v001,agent:DataEngineer
+2026-11-08,112,home-team,Larkspur home team,chat,Meridian,25,891,445,37.3,v001,agent:DataEngineer
+2026-11-08,112,vendor,Crestline Services,email,Meridian,16,459,459,101.9,v001,agent:DataEngineer
+2026-11-08,112,home-team,Larkspur home team,email,Meridian,7,493,493,37.3,v001,agent:DataEngineer
+2026-11-09,113,vendor,Crestline Services,voice,Meridian,48,2055,2055,127,v001,agent:DataEngineer
+2026-11-09,113,home-team,Larkspur home team,voice,Meridian,22,1325,1325,44.9,v001,agent:DataEngineer
+2026-11-09,113,vendor,Crestline Services,chat,Meridian,95,1042,521,127,v001,agent:DataEngineer
+2026-11-09,113,home-team,Larkspur home team,chat,Meridian,44,877,438,44.9,v001,agent:DataEngineer
+2026-11-09,113,vendor,Crestline Services,email,Meridian,29,439,439,127,v001,agent:DataEngineer
+2026-11-09,113,home-team,Larkspur home team,email,Meridian,13,497,497,44.9,v001,agent:DataEngineer
+2026-11-10,114,vendor,Crestline Services,voice,Meridian,57,1747,1747,127.3,v001,agent:DataEngineer
+2026-11-10,114,home-team,Larkspur home team,voice,Meridian,26,1316,1316,43.5,v001,agent:DataEngineer
+2026-11-10,114,vendor,Crestline Services,chat,Meridian,114,1126,563,127.3,v001,agent:DataEngineer
+2026-11-10,114,home-team,Larkspur home team,chat,Meridian,51,961,481,43.5,v001,agent:DataEngineer
+2026-11-10,114,vendor,Crestline Services,email,Meridian,34,455,455,127.3,v001,agent:DataEngineer
+2026-11-10,114,home-team,Larkspur home team,email,Meridian,16,477,477,43.5,v001,agent:DataEngineer
+2026-11-11,115,vendor,Crestline Services,voice,Meridian,54,1994,1994,124.9,v001,agent:DataEngineer
+2026-11-11,115,home-team,Larkspur home team,voice,Meridian,25,1249,1249,43.3,v001,agent:DataEngineer
+2026-11-11,115,vendor,Crestline Services,chat,Meridian,109,1082,541,124.9,v001,agent:DataEngineer
+2026-11-11,115,home-team,Larkspur home team,chat,Meridian,50,898,449,43.3,v001,agent:DataEngineer
+2026-11-11,115,vendor,Crestline Services,email,Meridian,32,476,476,124.9,v001,agent:DataEngineer
+2026-11-11,115,home-team,Larkspur home team,email,Meridian,15,478,478,43.3,v001,agent:DataEngineer
+2026-11-12,116,vendor,Crestline Services,voice,Meridian,48,1885,1885,120.6,v001,agent:DataEngineer
+2026-11-12,116,home-team,Larkspur home team,voice,Meridian,23,1219,1219,43.2,v001,agent:DataEngineer
+2026-11-12,116,vendor,Crestline Services,chat,Meridian,94,1110,555,120.6,v001,agent:DataEngineer
+2026-11-12,116,home-team,Larkspur home team,chat,Meridian,46,873,437,43.2,v001,agent:DataEngineer
+2026-11-12,116,vendor,Crestline Services,email,Meridian,28,477,477,120.6,v001,agent:DataEngineer
+2026-11-12,116,home-team,Larkspur home team,email,Meridian,14,436,436,43.2,v001,agent:DataEngineer
+2026-11-13,117,vendor,Crestline Services,voice,Meridian,38,1958,1958,120.6,v001,agent:DataEngineer
+2026-11-13,117,home-team,Larkspur home team,voice,Meridian,18,1315,1315,41.9,v001,agent:DataEngineer
+2026-11-13,117,vendor,Crestline Services,chat,Meridian,75,1026,513,120.6,v001,agent:DataEngineer
+2026-11-13,117,home-team,Larkspur home team,chat,Meridian,36,805,402,41.9,v001,agent:DataEngineer
+2026-11-13,117,vendor,Crestline Services,email,Meridian,22,475,475,120.6,v001,agent:DataEngineer
+2026-11-13,117,home-team,Larkspur home team,email,Meridian,11,474,474,41.9,v001,agent:DataEngineer
+2026-11-14,118,vendor,Crestline Services,voice,Meridian,20,2019,2019,93.5,v001,agent:DataEngineer
+2026-11-14,118,home-team,Larkspur home team,voice,Meridian,11,1331,1331,38.6,v001,agent:DataEngineer
+2026-11-14,118,vendor,Crestline Services,chat,Meridian,39,1079,540,93.5,v001,agent:DataEngineer
+2026-11-14,118,home-team,Larkspur home team,chat,Meridian,22,865,433,38.6,v001,agent:DataEngineer
+2026-11-14,118,vendor,Crestline Services,email,Meridian,12,455,455,93.5,v001,agent:DataEngineer
+2026-11-14,118,home-team,Larkspur home team,email,Meridian,6,478,478,38.6,v001,agent:DataEngineer
+2026-11-15,119,vendor,Crestline Services,voice,Meridian,21,1947,1947,99.8,v001,agent:DataEngineer
+2026-11-15,119,home-team,Larkspur home team,voice,Meridian,11,1231,1231,37.4,v001,agent:DataEngineer
+2026-11-15,119,vendor,Crestline Services,chat,Meridian,42,1097,549,99.8,v001,agent:DataEngineer
+2026-11-15,119,home-team,Larkspur home team,chat,Meridian,22,852,426,37.4,v001,agent:DataEngineer
+2026-11-15,119,vendor,Crestline Services,email,Meridian,13,473,473,99.8,v001,agent:DataEngineer
+2026-11-15,119,home-team,Larkspur home team,email,Meridian,6,485,485,37.4,v001,agent:DataEngineer
+2026-11-16,120,vendor,Crestline Services,voice,Meridian,50,1950,1950,124.1,v001,agent:DataEngineer
+2026-11-16,120,home-team,Larkspur home team,voice,Meridian,24,1249,1249,43.3,v001,agent:DataEngineer
+2026-11-16,120,vendor,Crestline Services,chat,Meridian,100,1225,612,124.1,v001,agent:DataEngineer
+2026-11-16,120,home-team,Larkspur home team,chat,Meridian,49,803,401,43.3,v001,agent:DataEngineer
+2026-11-16,120,vendor,Crestline Services,email,Meridian,30,437,437,124.1,v001,agent:DataEngineer
+2026-11-16,120,home-team,Larkspur home team,email,Meridian,15,470,470,43.3,v001,agent:DataEngineer

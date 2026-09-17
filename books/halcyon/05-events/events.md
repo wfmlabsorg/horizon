@@ -1,6 +1,6 @@
 # events.csv
 
-The intelligence ledger: typed, dated events with an effect window and a grade. Planned items and surprises are both here with their true dates (`planned` = yes/no). Grades: [M] measured from a system record · [A] asserted by one source · [E] estimated. `expected_signature` says what an analyst should see in the demand and supply ledgers.
+The intelligence ledger: typed, dated events with an effect window and a grade. Planned items and surprises are both here with their true dates (`planned` = yes/no). Grades: [M] measured from a system record · [A] asserted by one source · [E] estimated. `expected_signature` says what an analyst should see in the demand and supply ledgers. Rows here are the accepted ledger; Scout proposals live in `proposed/` until a planner accepts them.
 
 ## Provenance
 

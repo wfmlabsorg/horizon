@@ -47,35 +47,26 @@ register.
 
 ## Which definition each ledger column carries
 
-Two column vocabularies exist in phase 0. The **schema names** (`/schemas/*.schema.json`) are
-the target shape for phase 1 onward and are what the definition files cite. The **phase-0
-generated ledgers** in `02-demand/`, `04-supply/` and `03-forecast/v000-plan-of-record/`
-pre-date the schemas and use shorter names and unversioned filenames. This table is the
-crosswalk; when the two disagree, the definition slug is what a number cites, not the column.
+Since phase 1 the ledgers carry the schema column names (`/schemas/*.schema.json`) and each
+file's `.md` sidecar states the definition and grade per column, so the crosswalk is trivial:
+the column name is the schema name and the slug is what the sidecar says. The table is kept
+for the two columns that history has confused and for the plan of record.
 
-| Phase-0 file · column | Schema column | Definition | Note |
-|---|---|---|---|
-| `02-demand/daily-channel.csv` · `offered` | `offered` | `offered` | |
-| `02-demand/daily-channel.csv` · `handled` | `handled` | `handled` | |
-| `02-demand/daily-channel.csv` · `handled_in_sl` | `handled_in_sl` | `handled-in-sl` | |
-| `02-demand/daily-channel.csv` · `abandoned` | `abandoned` | `abandoned` | |
-| `02-demand/daily-channel.csv` · `asa_sec` | `asa_s` | `asa` | |
-| `02-demand/daily-channel.csv` · `sl_pct` | `sl_pct` | `service-level` | check the denominator in the file's `.md` header |
-| `02-demand/daily-channel.csv` · `aht_sec` | `aht_elapsed_s` | `aht-elapsed` | **elapsed**; chat rows include timeout wait. Never labelled AHT |
-| `02-demand/daily-channel.csv` · `aht_agent_sec` | `aht_agent_work_s` | `aht-agent-work` | the staffing number |
-| `02-demand/daily-cohort.csv` · `aht_sec`, `aht_agent_sec` | as above, by cohort | `aht-elapsed`, `aht-agent-work` | |
-| `02-demand/daily-transactions.csv` · `transactions` | `transactions` | `transaction` | by region and platform, as the composition trap requires |
-| `02-demand/daily-travelers.csv` | `active_travelers` | `contacts-per-traveler-day` (population input) | [E] at day grain |
-| `04-supply/daily-supply.csv` · `scheduled_hours` | `scheduled_h` | `scheduled-hours` | by cohort; no region split in phase 0 |
-| `04-supply/daily-supply.csv` · `staffed_hours` | `staffed_h` | `staffed-hours` | |
-| `04-supply/daily-supply.csv` · `productive_hours` | `productive_h` | `productive-hours` | |
-| `04-supply/daily-supply.csv` · `shrinkage_pct` | `shrink_planned_pct` + `shrink_unplanned_pct` | `shrinkage` | phase 0 carries one blended figure; the split is a phase-1 item |
-| `04-supply/daily-supply.csv` · `headcount`, `agents_in_training` | `headcount`, `headcount_in_training` | `fte` | |
-| (not stored in phase 0) | `occupancy_pct` | `occupancy` | computed on demand from handled × aht_agent_sec / productive_hours |
-| (not stored in phase 0) | `concurrency_eff` | `concurrency` | phase 0 uses the configured chat ceiling as an [E] stand-in |
-| `03-forecast/v000-plan-of-record/forecast-daily.csv` · `fc_aht_sec` | `aht_agent_work_fc_s` | **must be confirmed** | the plan of record does not say which handle time it carries; this is the two-definitions trap live in the book |
-| `03-forecast/v000-plan-of-record/forecast-daily.csv` · `fc_contacts_per_transaction` | — | `contacts-per-transaction` | book-level ratio; this is the composition trap live in the book |
-| `07-plans/*` · `req_hours` | `req_hours` | `requirement-hours` | |
+| File · column | Definition | Note |
+|---|---|---|
+| `02-demand/demand-daily-*.csv` · `aht_elapsed_s` | `aht-elapsed` | **elapsed**; chat rows include timeout wait and concurrency. Never labelled AHT |
+| `02-demand/demand-daily-*.csv` · `aht_agent_work_s` | `aht-agent-work` | the staffing number; chat = elapsed ÷ `concurrency_eff` |
+| `02-demand/demand-cohort-*.csv` · same two columns | as above, by cohort | |
+| `02-demand/beacon-daily-*.csv` · `*_aht_agent_work_s`, `messaging_elapsed_h` | `aht-agent-work`, `aht-elapsed` | Beacon elapsed is hours (asynchronous) and is not comparable to anything on Meridian |
+| `04-supply/supply-daily-*.csv` · `shrink_planned_pct`, `shrink_unplanned_pct` | `shrinkage` | base = scheduled hours; the split is stored from phase 1 |
+| `04-supply/supply-daily-*.csv` · `occupancy_pct` | `occupancy` | agent-work numerator |
+| `04-supply/supply-daily-*.csv` · `concurrency_eff` | `concurrency` | [E] for the vendor cohort |
+| `03-forecast/v000-plan-of-record/forecast-daily.csv` · `aht_agent_work_fc_s` | `aht-agent-work` | **stated since phase 1**: the plan carries Beacon agent-work time across the platform change, graded [E] (AS-011–AS-013). The two-definitions trap is now live in the comparison, not in the column name: chat `aht_elapsed_s` is 2–3× this figure and must never be compared to it |
+| `03-forecast/v000-plan-of-record/forecast-daily.csv` · `fc_contacts_per_transaction` | `contacts-per-transaction` | the whole-book ratio applied per region; the composition trap live in the book (AS-008) |
+| `07-plans/*` · `req_hours` | `requirement-hours` | |
+
+Every other column: see the sidecar beside the file (`<what>-<period>-v<nnn>.md`) and the
+folder README.
 
 ## Changing a definition
 

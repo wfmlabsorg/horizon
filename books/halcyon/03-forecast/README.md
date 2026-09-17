@@ -73,6 +73,10 @@ recorded in `lineage.md` and `version.json.lineage.trigger`.
 
 ## The plan of record
 
-`v000-plan-of-record/` is the forecast the book started with, owned by another agent in phase
-0. It carries a book-level contacts-per-transaction ratio and a blended handle time, which is
-the point: the chain should find both.
+`v000-plan-of-record/` is the forecast the book started with (`forecast-daily.csv`, by region ×
+channel, with `version.json`, `assumptions.md` and `lineage.md`). It carries a book-level
+contacts-per-transaction ratio applied to every region (AS-008) and Beacon handle times carried
+across the platform change and labelled, since phase 1, as `aht_agent_work_fc_s` [E]
+(AS-011–AS-013), which is the point: the chain should find both. Phase 1 has no Forecaster, so
+v000 is the only version and is scored every day; the daily note's reforecast block says
+"proposed: blocked".
