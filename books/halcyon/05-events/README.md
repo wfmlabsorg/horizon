@@ -8,7 +8,8 @@ Typed, dated events with an effect window and a grade: go-lives, configuration, 
 
 | File | Grain | Rows |
 |---|---|---|
-| `events.csv` | one row per event | 12 (EV-001 … EV-012) |
+| `events.csv` | one row per event | 12 (EV-001 … EV-012) — the accepted ledger |
+| `proposed/EV-###.md`, `proposed/INDEX.md` | one file per candidate | Written by the Scout in the daily clock for regime flags no accepted event accounts for; grade [E]; **never** in `events.csv` until a planner accepts. Ids continue the ledger's sequence and are permanent whether accepted or rejected |
 
 ## Columns
 

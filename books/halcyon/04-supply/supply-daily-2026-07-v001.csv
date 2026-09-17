@@ -1,0 +1,25 @@
+date,day,dow,region,channel,cohort,team,scheduled_h,staffed_h,productive_h,shrink_planned_pct,shrink_unplanned_pct,occupancy_pct,concurrency_eff,headcount,headcount_in_training,agents_scheduled,status,version,actor
+2026-07-20,1,Mon,all,all,vendor,Crestline Services,128,120.6,0,94.2,5.8,0,0,16,16,0,readiness,v001,agent:DataEngineer
+2026-07-20,1,Mon,all,all,home-team,Larkspur home team,0,0,0,0,0,0,0,0,0,0,not yet engaged,v001,agent:DataEngineer
+2026-07-21,2,Tue,all,all,vendor,Crestline Services,96,91.3,75.7,16.2,4.9,30,2,16,0,12,phase-1 hypercare,v001,agent:DataEngineer
+2026-07-21,2,Tue,all,all,home-team,Larkspur home team,0,0,0,0,0,0,2,0,0,0,not yet engaged,v001,agent:DataEngineer
+2026-07-22,3,Wed,all,all,vendor,Crestline Services,96,91.2,76,15.8,5,33,2,16,0,12,phase-1 hypercare,v001,agent:DataEngineer
+2026-07-22,3,Wed,all,all,home-team,Larkspur home team,0,0,0,0,0,0,2,0,0,0,not yet engaged,v001,agent:DataEngineer
+2026-07-23,4,Thu,all,all,vendor,Crestline Services,96,87.8,73.6,14.8,8.5,30.7,2,16,0,12,phase-1 hypercare,v001,agent:DataEngineer
+2026-07-23,4,Thu,all,all,home-team,Larkspur home team,0,0,0,0,0,0,2,0,0,0,not yet engaged,v001,agent:DataEngineer
+2026-07-24,5,Fri,all,all,vendor,Crestline Services,96,92.6,75,18.3,3.5,29.6,2,16,0,12,phase-1 hypercare,v001,agent:DataEngineer
+2026-07-24,5,Fri,all,all,home-team,Larkspur home team,0,0,0,0,0,0,2,0,0,0,not yet engaged,v001,agent:DataEngineer
+2026-07-25,6,Sat,all,all,vendor,Crestline Services,72,68.6,55.2,18.6,4.7,17.7,2,16,0,9,phase-1 hypercare,v001,agent:DataEngineer
+2026-07-25,6,Sat,all,all,home-team,Larkspur home team,0,0,0,0,0,0,2,0,0,0,not yet engaged,v001,agent:DataEngineer
+2026-07-26,7,Sun,all,all,vendor,Crestline Services,72,68.6,56.7,16.5,4.7,21.7,2,16,0,9,phase-1 hypercare,v001,agent:DataEngineer
+2026-07-26,7,Sun,all,all,home-team,Larkspur home team,0,0,0,0,0,0,2,0,0,0,not yet engaged,v001,agent:DataEngineer
+2026-07-27,8,Mon,all,all,vendor,Crestline Services,96,92,75.8,16.9,4.2,38.1,2,16,0,12,phase-1 hypercare,v001,agent:DataEngineer
+2026-07-27,8,Mon,all,all,home-team,Larkspur home team,0,0,0,0,0,0,2,0,0,0,not yet engaged,v001,agent:DataEngineer
+2026-07-28,9,Tue,all,all,vendor,Crestline Services,96,93,78.4,15.2,3.1,33.1,2,16,0,12,phase-1 hypercare,v001,agent:DataEngineer
+2026-07-28,9,Tue,all,all,home-team,Larkspur home team,0,0,0,0,0,0,2,0,0,0,not yet engaged,v001,agent:DataEngineer
+2026-07-29,10,Wed,all,all,vendor,Crestline Services,96,92.6,78.4,14.8,3.5,37.5,2,16,0,12,phase-1 hypercare,v001,agent:DataEngineer
+2026-07-29,10,Wed,all,all,home-team,Larkspur home team,0,0,0,0,0,0,2,0,0,0,not yet engaged,v001,agent:DataEngineer
+2026-07-30,11,Thu,all,all,vendor,Crestline Services,96,90.6,74.5,16.8,5.6,30,2,16,0,12,phase-1 hypercare,v001,agent:DataEngineer
+2026-07-30,11,Thu,all,all,home-team,Larkspur home team,0,0,0,0,0,0,2,0,0,0,not yet engaged,v001,agent:DataEngineer
+2026-07-31,12,Fri,all,all,vendor,Crestline Services,96,90.2,71.4,19.6,6,32.7,2,16,0,12,phase-1 hypercare,v001,agent:DataEngineer
+2026-07-31,12,Fri,all,all,home-team,Larkspur home team,0,0,0,0,0,0,2,0,0,0,not yet engaged,v001,agent:DataEngineer

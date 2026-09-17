@@ -1,0 +1,42 @@
+{
+  "pipeline": "HORIZON",
+  "book": {
+    "client": "halcyon",
+    "directory": "books/halcyon"
+  },
+  "clock": "weekly",
+  "run_date": "2026-09-13",
+  "run_id": "register-2026-09-13-r1",
+  "status": "completed",
+  "stages": [
+    {
+      "id": 1,
+      "name": "register_report",
+      "agent": "Reporter",
+      "status": "completed",
+      "input_files": [
+        "06-questions/register.md"
+      ],
+      "output_files": [
+        "08-reports/register/2026-09-13.md"
+      ],
+      "started_at": "2026-09-13T06:00:00+00:00",
+      "completed_at": "2026-09-13T06:06:00+00:00",
+      "notes": "register report from the register and its change log only"
+    }
+  ],
+  "gates": [
+    {
+      "name": "planner-publication",
+      "kind": "human",
+      "status": "pending",
+      "reason": "planner review of the register; not blocking inside the planning team"
+    }
+  ],
+  "changelog_entries": [
+    "| 2026-09-13 | `08-reports/register/2026-09-13.md` | agent:Reporter | register-2026-09-13-r1: register report |",
+    "| 2026-09-13 | `08-reports/runs/register-2026-09-13-r1.json` | agent:Coordinator | register-2026-09-13-r1: run state |"
+  ],
+  "created_at": "2026-09-13T06:00:00+00:00",
+  "completed_at": "2026-09-13T06:06:00+00:00"
+}

@@ -5,7 +5,11 @@
 
 import ExcelJS from "exceljs";
 
-const filePath = process.argv[2] || "/home/tedla/cloud/projects/job-search/portfolio/analytical-methodology/tools/Shapley.xlsx";
+const filePath = process.argv[2];
+if (!filePath) {
+  console.error("usage: bun run InspectExcel.ts <path-to-workbook.xlsx> [startRow] [endRow]");
+  process.exit(1);
+}
 const startRow = parseInt(process.argv[3] || "1");
 const endRow = parseInt(process.argv[4] || "100");
 

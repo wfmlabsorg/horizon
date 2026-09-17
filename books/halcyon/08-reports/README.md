@@ -10,7 +10,7 @@ came from is wrong; fix that and regenerate.
 |---|---|
 | Generate | From ledgers only (02, 03, 04, 05, 06, 07 and the run state). Never from memory, never from the messages. |
 | Gate | The daily note and the register report go through the `planner-publication` gate when they carry a reforecast decision or a Sev 1–2 change; otherwise the Evaluator's `answer-first-shape` check suffices. |
-| Issue | Filename carries the date: `daily-note-YYYY-MM-DD.md`, `weekly-review-YYYY-Www.md`, `register-report-YYYY-MM-DD.md`. A CHANGELOG line records the issue. |
+| Issue | Filename carries the date, in a folder per report: `daily/YYYY-MM-DD.md` (the scoring day), `weekly/YYYY-Www.md`, `register/YYYY-MM-DD.md`; run state and run logs in `runs/`. A CHANGELOG line records the issue. |
 | Supersede | The next issue supersedes the last. Old issues stay; nothing is deleted. |
 | Rerun | A rerun on the same date replaces the file and the CHANGELOG says why (usually a ledger correction). The replaced text is not kept; the ledger history is what matters. |
 | Never | Hand-edit a report. Add a number that is not in a ledger. Present an association as a cause. Omit a grade. |
@@ -21,7 +21,8 @@ came from is wrong; fix that and regenerate.
 |---|---|---|---|
 | Daily note | daily, after the planner gate | `TEMPLATE-daily-note.md` | run state, 02, 03 (approved + proposed), 04, 05, 06 (open rows) |
 | Weekly review | weekly | `TEMPLATE-weekly-review.md` | the week's daily notes' sources, 03 assumption registers, 06 |
-| Register report | weekly, and Sev 1 flash on change | `TEMPLATE-register-report.md` | 06 register.md and its change log only |
+| Register report | weekly, and Sev 1 flash on change | `TEMPLATE-register-report.md` | 06 register.md and its change log only, reconstructed as of the issue date |
+| Run state | every run | `/schemas/run-state.schema.json` | `runs/<clock>-<date>-r<n>.json` plus a one-table run log `.md` beside it |
 
 ## Answer-first shape (all three)
 

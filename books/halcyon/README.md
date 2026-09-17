@@ -6,7 +6,7 @@
 **Regions:** North, East, West
 **Platforms:** Beacon (legacy) migrating to Meridian in three phases
 
-This is the only book in phase 0. It is fictitious throughout; the demand and supply
+This is the only book in phases 0 and 1. It is fictitious throughout; the demand and supply
 ledgers are synthetic, generated with a recorded ground-truth causal model so the planning
 chain can be checked against what was actually put into the data.
 
@@ -32,7 +32,7 @@ chain can be checked against what was actually put into the data.
    column carries.
 2. Open `00-profile/` for the phase calendar; every variance question begins with "which
    phase were we in and which regions had migrated".
-3. Read the latest `08-reports/daily-note-*.md` for the current state, then follow its
+3. Read the latest `08-reports/daily/YYYY-MM-DD.md` for the current state, then follow its
    references into `06-questions/register.md` for anything open.
 
 ## Rules specific to this book

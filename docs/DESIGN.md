@@ -83,7 +83,7 @@ One fictitious corporate client (Halcyon Group) served first on the legacy platf
 
 ## 8. The demo storyline
 
-Day 1 to day 40 of the migration in a Codespace. The chain flags the handle-time shift on day 3 (the humans in the real case saw it on day 56). Phase 2 lands on plan and the note says so. Growth without population is flagged on day 44 with three hypotheses and their tests. The outage day is isolated from the demand trend. A leader asks "why did service break on day 38" and gets a graded answer card in the register within the hour, with what would change the answer. The monthly plan proposes phase 3 sizing in hours by channel with the assumption register attached, and waits for a signature.
+Day 1 to day 40 of the migration in a Codespace. The chain flags the handle-time shift on day 2 and confirms it on day 3 (the humans in the real case saw it on day 56). Phase 2 lands on plan and the note says so. Growth without population is flagged on day 45 with three hypotheses and their tests. The outage day is isolated from the demand trend. A leader asks "why did service break on day 38" and gets a graded answer card in the register within the hour, with what would change the answer. The monthly plan proposes phase 3 sizing in hours by channel with the assumption register attached, and waits for a signature.
 
 ## 9. Build phases
 

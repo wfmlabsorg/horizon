@@ -1,0 +1,269 @@
+{
+  "pipeline": "HORIZON",
+  "book": {
+    "client": "halcyon",
+    "directory": "books/halcyon"
+  },
+  "clock": "daily",
+  "run_date": "2026-11-14",
+  "run_id": "daily-2026-11-14-r1",
+  "status": "completed",
+  "stages": [
+    {
+      "id": 1,
+      "name": "ingest",
+      "agent": "DataEngineer",
+      "status": "completed",
+      "input_files": [
+        "02-demand/demand-daily-2026-11-v001.csv",
+        "04-supply/supply-daily-2026-11-v001.csv"
+      ],
+      "output_files": [
+        "02-demand/RECONCILIATION.md",
+        "04-supply/RECONCILIATION.md"
+      ],
+      "started_at": "2026-11-15T06:00:00+00:00",
+      "completed_at": "2026-11-15T06:04:00+00:00",
+      "notes": "read the 2026-11-14 rows from the versioned month files; 7 checks"
+    },
+    {
+      "id": 2,
+      "name": "reconcile",
+      "agent": "DataEngineer",
+      "status": "completed",
+      "input_files": [],
+      "output_files": [
+        "02-demand/RECONCILIATION.md",
+        "04-supply/RECONCILIATION.md"
+      ],
+      "started_at": "2026-11-15T06:04:00+00:00",
+      "completed_at": "2026-11-15T06:08:00+00:00",
+      "notes": "reconciled: true; all identities close"
+    },
+    {
+      "id": 3,
+      "name": "score",
+      "agent": "PostAnalyst",
+      "status": "completed",
+      "input_files": [
+        "02-demand/demand-daily-2026-11-v001.csv",
+        "04-supply/supply-daily-2026-11-v001.csv",
+        "03-forecast/v000-plan-of-record/forecast-daily.csv"
+      ],
+      "output_files": [
+        "03-forecast/variance/2026-11-14.md"
+      ],
+      "started_at": "2026-11-15T06:08:00+00:00",
+      "completed_at": "2026-11-15T06:12:00+00:00",
+      "notes": "scored v000 on 6 region×channel rows"
+    },
+    {
+      "id": 4,
+      "name": "decompose",
+      "agent": "PostAnalyst",
+      "status": "completed",
+      "input_files": [],
+      "output_files": [
+        "03-forecast/variance/2026-11-14.md"
+      ],
+      "started_at": "2026-11-15T06:12:00+00:00",
+      "completed_at": "2026-11-15T06:16:00+00:00",
+      "notes": "sequential decomposition; 1 new regime flag(s), 3 continuing"
+    },
+    {
+      "id": 5,
+      "name": "match_events",
+      "agent": "Scout",
+      "status": "completed",
+      "input_files": [
+        "05-events/events.csv",
+        "03-forecast/variance/2026-11-14.md"
+      ],
+      "output_files": [
+        "05-events/proposed/EV-049.md"
+      ],
+      "started_at": "2026-11-15T06:16:00+00:00",
+      "completed_at": "2026-11-15T06:20:00+00:00",
+      "notes": "2 event(s) matched (0 explain a break); 1 proposed"
+    },
+    {
+      "id": 6,
+      "name": "update_hypotheses",
+      "agent": "Librarian",
+      "status": "completed",
+      "input_files": [
+        "06-questions/register.md"
+      ],
+      "output_files": [
+        "06-questions/register.md",
+        "06-questions/XR-008.md",
+        "06-questions/XR-002.md"
+      ],
+      "started_at": "2026-11-15T06:20:00+00:00",
+      "completed_at": "2026-11-15T06:24:00+00:00",
+      "notes": "0 XR opened, 2 touched"
+    },
+    {
+      "id": 7,
+      "name": "reforecast",
+      "agent": "Forecaster",
+      "status": "skipped",
+      "input_files": [],
+      "output_files": [],
+      "started_at": "2026-11-15T06:24:00+00:00",
+      "completed_at": "2026-11-15T06:24:00+00:00",
+      "notes": "phase 1: stage not implemented; structure only"
+    },
+    {
+      "id": 8,
+      "name": "evaluate",
+      "agent": "Evaluator",
+      "status": "skipped",
+      "input_files": [],
+      "output_files": [],
+      "started_at": "2026-11-15T06:24:00+00:00",
+      "completed_at": "2026-11-15T06:24:00+00:00",
+      "notes": "phase 1: stage not implemented; structure only"
+    },
+    {
+      "id": 9,
+      "name": "planner_gate",
+      "agent": "Planner",
+      "status": "skipped",
+      "input_files": [],
+      "output_files": [],
+      "started_at": "2026-11-15T06:24:00+00:00",
+      "completed_at": "2026-11-15T06:24:00+00:00",
+      "notes": "not raised: nothing proposed; v000 carried"
+    },
+    {
+      "id": 10,
+      "name": "publish",
+      "agent": "Reporter",
+      "status": "completed",
+      "input_files": [
+        "03-forecast/variance/2026-11-14.md",
+        "05-events/events.csv",
+        "06-questions/register.md"
+      ],
+      "output_files": [
+        "08-reports/daily/2026-11-14.md"
+      ],
+      "started_at": "2026-11-15T06:24:00+00:00",
+      "completed_at": "2026-11-15T06:28:00+00:00",
+      "notes": "daily note from ledgers only; v000 in force"
+    },
+    {
+      "id": 11,
+      "name": "export_iex",
+      "agent": "Adapter-IEX",
+      "status": "skipped",
+      "input_files": [],
+      "output_files": [],
+      "started_at": "2026-11-15T06:28:00+00:00",
+      "completed_at": "2026-11-15T06:28:00+00:00",
+      "notes": "phase 1: stage not implemented; structure only"
+    }
+  ],
+  "gates": [
+    {
+      "name": "evaluator",
+      "kind": "agent",
+      "status": "waived",
+      "decided_by": "agent:Coordinator",
+      "decided_at": "2026-11-15T06:24:00+00:00",
+      "reason": "phase 1 has no Evaluator stage; the Reporter checks answer-first shape, grades and definition slugs by rule",
+      "rules_checked": [
+        "grades-present",
+        "definitions-cited",
+        "sums-reconcile",
+        "answer-first-shape"
+      ]
+    },
+    {
+      "name": "planner-reforecast",
+      "kind": "human",
+      "status": "pending",
+      "reason": "no reforecast proposed: phase 1 has no Forecaster; v000 plan of record carried forward (Coordinator rule: no decision → carry the prior approved version)"
+    }
+  ],
+  "reforecast": {
+    "status": "not_needed",
+    "trigger": "Larkspur home team · chat · aht-agent-work"
+  },
+  "variance_summary": {
+    "by_channel": [
+      {
+        "channel": "voice",
+        "forecast": 6.2,
+        "actual": 32,
+        "variance_pct": 416.13,
+        "decomposition": {
+          "volume": 8.24,
+          "handle_time": 0.97,
+          "mix": 1.45,
+          "supply": 6.4,
+          "residual": 4.05,
+          "method": "sequential"
+        }
+      },
+      {
+        "channel": "chat",
+        "forecast": 14.4,
+        "actual": 63,
+        "variance_pct": 337.5,
+        "decomposition": {
+          "volume": 6.33,
+          "handle_time": 0.54,
+          "mix": -0.29,
+          "supply": 3.83,
+          "residual": 1.83,
+          "method": "sequential"
+        }
+      },
+      {
+        "channel": "email",
+        "forecast": 4.3,
+        "actual": 18,
+        "variance_pct": 318.6,
+        "decomposition": {
+          "volume": 2.09,
+          "handle_time": 0.09,
+          "mix": -0.21,
+          "supply": 1.07,
+          "residual": 0.28,
+          "method": "sequential"
+        }
+      }
+    ],
+    "regime_flags": [
+      "Larkspur home team · chat · aht-agent-work: trend (trend (slope |t| > 4 over 21 d, change > 3σ)), demand-side, onset 2026-10-25"
+    ]
+  },
+  "events_matched": [
+    "EV-002",
+    "EV-009"
+  ],
+  "questions_touched": [
+    "XR-008",
+    "XR-002"
+  ],
+  "skills_invoked": [
+    "VarianceAnalysis",
+    "ProcessCapability",
+    "StatisticalAnalysis"
+  ],
+  "causal_escalation": false,
+  "changelog_entries": [
+    "| 2026-11-14 | `02-demand/RECONCILIATION.md` | agent:DataEngineer | daily-2026-11-14-r1: reconciliation stamp for 2026-11-14 (closes) |",
+    "| 2026-11-14 | `04-supply/RECONCILIATION.md` | agent:DataEngineer | daily-2026-11-14-r1: reconciliation stamp for 2026-11-14 |",
+    "| 2026-11-14 | `03-forecast/variance/2026-11-14.md` | agent:PostAnalyst | daily-2026-11-14-r1: variance, decomposition, SPC (1 flag(s)) |",
+    "| 2026-11-14 | `05-events/proposed/EV-049.md` | agent:Scout | daily-2026-11-14-r1: proposed event [E] for Larkspur home team · chat · aht-agent-work — awaiting planner review |",
+    "| 2026-11-14 | `06-questions/register.md` | agent:Librarian | daily-2026-11-14-r1: XR-008 touched, XR-002 touched |",
+    "| 2026-11-14 | `08-reports/daily/2026-11-14.md` | agent:Reporter | daily-2026-11-14-r1: daily note issued |",
+    "| 2026-11-14 | `08-reports/runs/daily-2026-11-14-r1.json` | agent:Coordinator | daily-2026-11-14-r1: run state (completed) |"
+  ],
+  "created_at": "2026-11-15T06:00:00+00:00",
+  "updated_at": "2026-11-15T06:28:00+00:00",
+  "completed_at": "2026-11-15T06:28:00+00:00"
+}

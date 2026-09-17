@@ -14,21 +14,23 @@ The script prints a weekly summary table and a list of planted-signature checks 
 
 ## Files written
 
+Phase 1 decision (docs/PHASE-1-BACKLOG.md item 1): the ledger conventions win. Files are named `<what>-<period>-v<nnn>.csv` with one file per calendar month and a `.md` sidecar each (source, pull, definition and grade per column); columns follow `/schemas/demand-daily.schema.json` and `/schemas/supply-daily.schema.json`. Everything above the output section of `generate.ts` is unchanged, so the seed reproduces the phase-0 numbers exactly.
+
 | Path | Rows | What |
 |---|---|---|
-| `books/halcyon/02-demand/daily-channel.csv` | 360 | Daily actuals by channel on Meridian, days 1–120 |
-| `books/halcyon/02-demand/interval-30min.csv` | 11,520 | 30-minute intervals, chat and voice; sums exactly to daily |
-| `books/halcyon/02-demand/daily-cohort.csv` | 570 | Handled and AHT by cohort × channel |
-| `books/halcyon/02-demand/daily-transactions.csv` | 360 | Transactions by region (whole book), platform tagged |
-| `books/halcyon/02-demand/daily-travelers.csv` | 120 | Distinct travelers, contacts per traveler-day, contacts per transaction |
-| `books/halcyon/02-demand/beacon-daily.csv` | 325 | Beacon history: 56 days before day 1 for all regions, then each region while still on Beacon |
-| `books/halcyon/04-supply/daily-supply.csv` | 240 | Scheduled, staffed, productive hours; agents scheduled and in training; by cohort |
-| `books/halcyon/05-events/events.csv` | 12 | The intelligence ledger, planned items and surprises with true dates |
-| `books/halcyon/03-forecast/v000-plan-of-record/forecast-daily.csv` | 360 | The original plan by channel, built on the wrong assumptions |
+| `books/halcyon/02-demand/demand-daily-<YYYY-MM>-v001.csv` | 609 | Daily actuals by region × channel on Meridian (North from day 2, East from day 37); region split by traveler-profile weight, handle time at skill level |
+| `books/halcyon/02-demand/demand-interval-<YYYY-MM>-v001.csv` | 11,520 | 30-minute intervals, chat and voice, skill level; sums exactly to the channel-day |
+| `books/halcyon/02-demand/demand-cohort-<YYYY-MM>-v001.csv` | 570 | Handled and handle time by cohort × channel |
+| `books/halcyon/02-demand/transactions-daily-<YYYY-MM>-v001.csv` | 360 | Transactions by region (whole book), platform tagged |
+| `books/halcyon/02-demand/travelers-daily-<YYYY-MM>-v001.csv` | 120 | Active travelers, contacts per traveler-day, contacts per transaction (Meridian) |
+| `books/halcyon/02-demand/beacon-daily-<YYYY-MM>-v001.csv` | 325 | Beacon history: 56 days before day 1 for all regions, then each region while still on Beacon |
+| `books/halcyon/04-supply/supply-daily-<YYYY-MM>-v001.csv` | 240 | Scheduled, staffed, productive hours; planned and unplanned shrinkage; occupancy; effective concurrency; heads; by cohort (region and channel `all`: blended pools) |
+| `books/halcyon/05-events/events.csv` | 12 | The intelligence ledger, planned items and surprises with true dates (accepted ledger; the Scout's proposals go to `proposed/`) |
+| `books/halcyon/03-forecast/v000-plan-of-record/forecast-daily.csv` | 609 | The original plan by region × channel, built on the wrong assumptions; handle-time column `aht_agent_work_fc_s` states its definition |
 | `sim/ground-truth-daily.csv` | 120 | Day-level latents (season factor, overflow, spillover, ρ, cohort multipliers). Not part of the book |
 | `sim/weekly-summary.md` | — | The verification table |
 
-Each CSV has a `.md` header beside it stating the layout, the definition each column cites, and provenance. Hand-written READMEs in each book folder are not overwritten by the generator.
+Hand-written READMEs in each book folder are not overwritten by the generator. The generator does not delete files: if you rename a ledger, remove the old file yourself and record it in the CHANGELOG.
 
 ## Design notes
 
